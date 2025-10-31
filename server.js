@@ -94,11 +94,6 @@ app.get("/photos", (_req, res) => {
   res.json(ordered);
 });
 
-// ルートアクセス時に index.html を返す
-app.get("/", (req, res) => {
- res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 app.listen(PORT, () => {
   console.log(`+ILLuSio running at http://localhost:${PORT}`);
 });

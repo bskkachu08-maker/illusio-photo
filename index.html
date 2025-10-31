@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>＋ILLuSio – Necklace Studio</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header><div class="logo">＋ILLuSio</div></header>
+
+  <main>
+    <div id="stageWrapper">
+      <canvas id="wireCanvas"></canvas>
+    </div>
+  </main>
+
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <footer>
+    <button class="btn" id="resetBtn">リセット</button>
+    <button class="btn primary" id="saveBtn">ネックレスを保存</button>
+    <span style="color:#777;font-size:12px;">写真を右側からドラッグ → 円の上で配置・右下でリサイズ</span>
+  </footer>
+
+<script>
+// Draw wire circle on canvas
+const stage = document.getElementById('stageWrapper');
+const canvas = document.getElementById('wireCanvas');
+const ctx = canvas.getContext('2d');
+
+function drawWire(){
+  const dpr = window.devicePixelRatio || 1;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w + "px"; canvas.style.height = h + "px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const radius = Math.min(w,h)*0.35;
+  const cx = w/2, cy = h/2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI*2);
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--wire').trim();
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+new ResizeObserver(drawWire).observe(stage);
+
+// Sidebar load
+const COLORS = ["赤","ピンク","青","緑","白","紫","ターコイズ","透明","金色","シルバー","黒","その他"];
+async function loadPhotos(){
+  const res = await fetch('/photos');
+  const data = await res.json();
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = "";
+  data.forEach(group => {
+    if (!group || !group.items || group.items.length===0) return;
+    const title = document.createElement('div');
+    title.className = 'groupTitle';
+    title.textContent = group.color;
+    sidebar.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    sidebar.appendChild(grid);
+    group.items.forEach(url => {
+      const t = document.createElement('div');
+      t.className = 'thumb';
+      const img = document.createElement('img');
+      img.src = url;
+      t.appendChild(img);
+      t.addEventListener('pointerdown', (e)=>{
+        spawnPhoto(url);
+      });
+      grid.appendChild(t);
+    });
+  });
+}
+loadPhotos();
+
+// Drag/resize on stage
+let zCounter = 10;
+let selected = null;
+let dragState = null, resizeState = null;
+
+function spawnPhoto(url){
+  const box = document.createElement('div');
+  box.className = 'photoItem';
+  const w = 120, h = 120;
+  box.style.left = (stage.clientWidth/2 - w/2) + "px";
+  box.style.top = (stage.clientHeight/2 - h/2) + "px";
+  box.style.width = w + "px";
+  box.style.height = h + "px";
+  box.style.zIndex = ++zCounter;
+  const img = document.createElement('img');
+  img.src = url;
+  box.appendChild(img);
+  const handle = document.createElement('div');
+  handle.className = 'resizeHandle';
+  box.appendChild(handle);
+  stage.appendChild(box);
+
+  box.addEventListener('pointerdown', (e)=>{
+    if (e.target===handle) return;
+    select(box);
+    startDrag(e, box);
+  });
+  handle.addEventListener('pointerdown', (e)=>{
+    e.stopPropagation();
+    select(box);
+    startResize(e, box);
+  });
+}
+
+function select(node){
+  if (selected && selected!==node) selected.classList.remove('selected');
+  selected = node;
+  if (selected) {
+    selected.classList.add('selected');
+    selected.style.zIndex = ++zCounter;
+  }
+}
+
+function startDrag(e, node){
+  const rect = node.getBoundingClientRect();
+  const srect = stage.getBoundingClientRect();
+  dragState = {
+    node, startX:e.clientX, startY:e.clientY,
+    left: rect.left - srect.left, top: rect.top - srect.top,
+    w: rect.width, h: rect.height
+  };
+  window.addEventListener('pointermove', onDragMove);
+  window.addEventListener('pointerup', endDrag);
+}
+function onDragMove(e){
+  if(!dragState) return;
+  let nl = dragState.left + (e.clientX - dragState.startX);
+  let nt = dragState.top + (e.clientY - dragState.startY);
+  // soft bounds
+  nl = Math.max(-dragState.w*0.5, Math.min(nl, stage.clientWidth - dragState.w*0.5));
+  nt = Math.max(-dragState.h*0.5, Math.min(nt, stage.clientHeight - dragState.h*0.5));
+  dragState.node.style.left = nl + "px";
+  dragState.node.style.top = nt + "px";
+}
+function endDrag(){
+  window.removeEventListener('pointermove', onDragMove);
+  window.removeEventListener('pointerup', endDrag);
+  dragState = null;
+}
+
+function startResize(e, node){
+  const rect = node.getBoundingClientRect();
+  resizeState = { node, startX:e.clientX, startY:e.clientY, w: rect.width, h: rect.height };
+  window.addEventListener('pointermove', onResizeMove);
+  window.addEventListener('pointerup', endResize);
+}
+function onResizeMove(e){
+  if(!resizeState) return;
+  let nw = resizeState.w + (e.clientX - resizeState.startX);
+  let nh = resizeState.h + (e.clientY - resizeState.startY);
+  nw = Math.max(40, Math.min(nw, stage.clientWidth));
+  nh = Math.max(40, Math.min(nh, stage.clientHeight));
+  resizeState.node.style.width = nw + "px";
+  resizeState.node.style.height = nh + "px";
+}
+function endResize(){
+  window.removeEventListener('pointermove', onResizeMove);
+  window.removeEventListener('pointerup', endResize);
+  resizeState = null;
+}
+
+// Delete key
+window.addEventListener('keydown', (e)=>{
+  if (e.key === "Delete" && selected) {
+    selected.remove();
+    selected = null;
+  }
+});
+
+// Save PNG
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  const canvasOut = document.createElement('canvas');
+  canvasOut.width = w * dpr; canvasOut.height = h * dpr;
+  const c = canvasOut.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  // white background
+  c.fillStyle = "#FFFFFF";
+  c.fillRect(0,0,w,h);
+  // wire
+  const radius = Math.min(w,h)*0.35;
+  const cx = w/2, cy = h/2;
+  c.beginPath();
+  c.arc(cx, cy, radius, 0, Math.PI*2);
+  c.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--wire').trim();
+  c.lineWidth = 2;
+  c.stroke();
+  // photos in z order
+  const items = [...stage.querySelectorAll('.photoItem')].sort((a,b)=>(parseInt(a.style.zIndex||"0")-parseInt(b.style.zIndex||"0")));
+  await Promise.all(items.map(async (el)=>{
+    const rect = el.getBoundingClientRect();
+    const srect = stage.getBoundingClientRect();
+    const x = rect.left - srect.left;
+    const y = rect.top - srect.top;
+    const iw = rect.width, ih = rect.height;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    const src = el.querySelector('img').src;
+    await new Promise((resolve)=>{ img.onload=resolve; img.src = src; });
+    c.drawImage(img, x, y, iw, ih);
+  }));
+  const link = document.createElement('a');
+  link.download = "necklace.png";
+  link.href = canvasOut.toDataURL("image/png");
+  link.click();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  document.querySelectorAll('.photoItem').forEach(n=>n.remove());
+  selected = null;
+});
+</script>
+</body>
+</html>
