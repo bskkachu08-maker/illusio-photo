@@ -1,121 +1,53 @@
 body {
- margin: 0;
- font-family: "Hiragino Sans", sans-serif;
- background-color: #f8f8f8;
- color: #333;
- overflow-x: hidden;
-}
-header {
  text-align: center;
- padding: 10px 0;
+ font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+ background-color: #f8f8f8;
 }
-#canvas-area {
+#necklace-area {
  position: relative;
+ width: 90vw;
+ height: 90vw;
+ max-width: 400px;
+ max-height: 400px;
+ margin: 0 auto;
+}
+#necklaceCanvas {
  width: 100%;
- height: 80vh;
+ height: 100%;
+ border-radius: 50%;
+ border: 3px solid silver;
+ background-color: transparent;
+}
+#buttons {
+ margin-top: 1em;
  display: flex;
  justify-content: center;
- align-items: center;
- transition: transform 0.4s ease, scale 0.4s ease;
+ gap: 10px;
 }
-#w
-ire {
- position: absolute;
- width: 60vmin;
- height: 60vmin;
- border: 3px solid silver;
- border-radius: 50%;
- background: transparent;
- box-shadow: 0 0 10px rgba(180, 180, 180, 0.5);
-}
-#drop-zone {
- position: absolute;
- width: 60vmin;
- height: 60vmin;
- border-radius: 50%;
- overflow: visible;
-}
-.draggable {
- position: absolute;
- width: 10vmin;
- height: 10vmin;
- object-fit: cover;
- border-radius: 50%;
- cursor: move;
-}
-#open-parts-btn,
-#save-btn {
- position: fixed;
- bottom: 20px;
- background: #333;
+button {
+ background-color: #222;
  color: white;
  border: none;
- border-radius: 8px;
- padding: 12px 20px;
- cursor: pointer;
- font-size: 1rem;
- z-index: 10;
- transition: background 0.2s;
+ padding: 10px 15px;
+ border-radius: 5px;
+ font-size: 16px;
 }
-#open-parts-btn:hover,
-#save-btn:hover {
- background: #555;
-}
-#open-parts-btn {
- right: 20px;
-}
-#save-btn {
- left: 20px;
-}
-#drawer {
+#partsPanel {
  position: fixed;
- left: 0;
- bottom: -50vh;
- width: 100%;
- height: 40vh;
- background: white;
- border-top-left-radius: 20px;
- border-top-right-radius: 20px;
- box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
- transition: bottom 0.4s ease;
- z-index: 20;
- display: flex;
- flex-direction: column;
-}
-#drawer.open {
  bottom: 0;
-}
-#drawer-header {
- display: flex;
- justify-content: space-between;
- align-items: center;
- padding: 10px 20px;
- border-bottom: 1px solid #ddd;
-}
-#drawer h2 {
- margin: 0;
- font-size: 1.1rem;
-}
-#close-drawer-btn {
- background: none;
- border: none;
- font-size: 1.3rem;
- cursor: pointer;
-}
-#parts {
- display: flex;
- flex-wrap: nowrap;
- overflow-x: auto;
+ left: 0;
+ right: 0;
+ background: white;
+ border-top: 2px solid #ccc;
  padding: 10px;
+ display: none;
 }
-#parts img {
- width: 90px;
- height: 90px;
- border-radius: 6px;
- margin-right: 10px;
- object-fit: cover;
+#partsPanel.active {
+ display: block;
+}
+#partsList img {
+ width: 50px;
+ height: 50px;
+ margin: 5px;
  cursor: grab;
-}
-.drawer-open #canvas-area {
- transform: translateY(-10vh) scale(0.85);
 }
