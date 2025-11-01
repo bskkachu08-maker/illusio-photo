@@ -9,21 +9,22 @@
 <body>
 <header>
 <h1>＋ILLuSio Necklace Designer</h1>
-<p>右のパーツをドラッグして、中央のワイヤーに並べてください.</p>
 </header>
 <main>
 <div id="canvas-area">
 <div id="wire"></div>
 <div id="drop-zone"></div>
 </div>
-<aside id="parts-panel">
-<h2>パーツ一覧</h2>
-<div id="parts"></div>
-</aside>
 </main>
-<footer>
-<button id="save-btn">このネックレスを保存する💎</button>
-</footer>
+<button id="open-parts-btn">💠 パーツ一覧</button>
+<button id="save-btn">💎 このネックレスを保存</button>
+<div id="drawer">
+<div id="drawer-header">
+<h2>パーツ一覧</h2>
+<button id="close-drawer-btn">✕</button>
+</div>
+<div id="parts"></div>
+</div>
 <script src="necklace.js"></script>
 </body>
 </html>
