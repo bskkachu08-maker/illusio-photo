@@ -8,7 +8,7 @@ const partsList = document.getElementById("partsList");
 const necklaceArea = document.getElementById("necklace-area");
 canvas.width = 400;
 canvas.height = 400;
-// ワイヤー（1本）
+// ワイヤー1本
 function drawNecklace() {
  ctx.clearRect(0, 0, canvas.width, canvas.height);
  ctx.beginPath();
@@ -18,15 +18,15 @@ function drawNecklace() {
  ctx.stroke();
 }
 drawNecklace();
-// パーツ一覧パネルの開閉
-partsBtn.addEventListener("click", () => {
- partsPanel.classList.toggle("active");
-});
-// 「＋パーツ追加」で別ページへ
+// ページ遷移
 addPartsPage.addEventListener("click", () => {
  window.location.href = "admin.html";
 });
-// パーツ一覧読み込み
+// パーツ一覧開閉
+partsBtn.addEventListener("click", () => {
+ partsPanel.classList.toggle("active");
+});
+// JSONからパーツ読み込み
 async function loadParts() {
  const res = await fetch("/photos.json");
  const data = await res.json();
@@ -76,7 +76,7 @@ function makeDraggable(el) {
    isDragging = false;
  }
 }
-// 保存
+// 保存機能
 saveBtn.addEventListener("click", () => {
  html2canvas(necklaceArea).then((canvasSave) => {
    const link = document.createElement("a");
