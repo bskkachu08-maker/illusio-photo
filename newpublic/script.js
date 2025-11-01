@@ -1,15 +1,14 @@
 const canvas = document.getElementById("necklaceCanvas");
 const ctx = canvas.getContext("2d");
 const saveBtn = document.getElementById("saveBtn");
-const addPartsBtn = document.getElementById("addPartsBtn");
-const uploadParts = document.getElementById("uploadParts");
+const addPartsPage = document.getElementById("addPartsPage");
 const partsBtn = document.getElementById("partsBtn");
 const partsPanel = document.getElementById("partsPanel");
 const partsList = document.getElementById("partsList");
 const necklaceArea = document.getElementById("necklace-area");
 canvas.width = 400;
 canvas.height = 400;
-// 銀色ワイヤー
+// ワイヤー（1本）
 function drawNecklace() {
  ctx.clearRect(0, 0, canvas.width, canvas.height);
  ctx.beginPath();
@@ -19,31 +18,36 @@ function drawNecklace() {
  ctx.stroke();
 }
 drawNecklace();
-// パーツ一覧表示
+// パーツ一覧パネルの開閉
 partsBtn.addEventListener("click", () => {
  partsPanel.classList.toggle("active");
 });
-// ＋パーツ追加
-addPartsBtn.addEventListener("click", () => {
- uploadParts.click();
+// 「＋パーツ追加」で別ページへ
+addPartsPage.addEventListener("click", () => {
+ window.location.href = "admin.html";
 });
-uploadParts.addEventListener("change", (e) => {
- const files = e.target.files;
- for (const file of files) {
+// パーツ一覧読み込み
+async function loadParts() {
+ const res = await fetch("/photos.json");
+ const data = await res.json();
+ partsList.innerHTML = "";
+ data.forEach((p) => {
    const img = document.createElement("img");
-   img.src = URL.createObjectURL(file);
-   img.classList.add("part");
-   partsList.appendChild(img);
+   img.src = p.url;
+   img.alt = p.color;
    img.addEventListener("click", () => {
      const clone = img.cloneNode();
      clone.style.left = "180px";
      clone.style.top = "180px";
+     clone.className = "part";
      necklaceArea.appendChild(clone);
      makeDraggable(clone);
    });
- }
-});
-// ドラッグできる
+   partsList.appendChild(img);
+ });
+}
+loadParts();
+// ドラッグ操作
 function makeDraggable(el) {
  let offsetX, offsetY, isDragging = false;
  el.addEventListener("mousedown", startDrag);
@@ -72,7 +76,7 @@ function makeDraggable(el) {
    isDragging = false;
  }
 }
-// 保存機能
+// 保存
 saveBtn.addEventListener("click", () => {
  html2canvas(necklaceArea).then((canvasSave) => {
    const link = document.createElement("a");
