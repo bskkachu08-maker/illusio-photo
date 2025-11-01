@@ -1,130 +1,47 @@
-
 import express from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static(path.join(__dirname, "newpublic")));
-// Password for admin upload
-
-const ADMIN_PASSWORD = "Chipi0503";
-
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-// Colors (order fixed)
-const COLOR_ORDER = [
-  "赤","ピンク","青","緑","白","紫","ターコイズ","透明","金色","シルバー","黒","その他"
-];
-
-// Photos JSON path
-const photosJsonPath = path.join(__dirname, "photos.json");
-
-// Initialize JSON if missing
-if (!fs.existsSync(photosJsonPath)) {
-  const init = COLOR_ORDER.map(c => ({ color: c, items: [] }));
-  fs.writeFileSync(photosJsonPath, JSON.stringify(init, null, 2), "utf-8");
-}
-
-// Multer storage
+const PORT = process.env.PORT || 10000;
+// 静的ファイル
+app.use(express.static(path.join(__dirname, "public")));
+// JSONファイル読み書き
+const photosFile = path.join(__dirname, "photos.json");
+// multer設定（画像保存先）
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const safe = Date.now() + "_" + file.originalname.replace(/[^\w.\-]/g, "_");
-    cb(null, safe);
-  }
+ destination: function (req, file, cb) {
+   const uploadPath = path.join(__dirname, "public", "uploads");
+   if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+   cb(null, uploadPath);
+ },
+ filename: function (req, file, cb) {
+   cb(null, Date.now() + path.extname(file.originalname));
+ }
 });
 const upload = multer({ storage });
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Static
-app.use("/uploads", express.static(uploadDir));
-app.use("/", express.static(path.join(__dirname, "public")));
-
-// Helper to load/save photos JSON
-function loadPhotos() {
-  try {
-    const txt = fs.readFileSync(photosJsonPath, "utf-8");
-    return JSON.parse(txt);
-  } catch (e) {
-    return COLOR_ORDER.map(c => ({ color: c, items: [] }));
-  }
-}
-function savePhotos(data) {
-  fs.writeFileSync(photosJsonPath, JSON.stringify(data, null, 2), "utf-8");
-}
-
-// Upload endpoint (admin-only)
-app.post("/upload", upload.array("photos"), (req, res) => {
-  
- const auth = req.headers.authorization || "";
-if (auth.replace("Bearer ", "") !== ADMIN_PASSWORD) {
- return res.status(403).json({ error: "Forbidden: incorrect password" });
-}
-  const selectedColor = req.body.color;
-  if (!COLOR_ORDER.includes(selectedColor)) {
-    return res.status(400).json({ error: "Invalid color" });
-  }
-  const files = (req.files || []).map(f => "/uploads/" + f.filename);
-  const data = loadPhotos();
-  const idx = data.findIndex(x => x.color === selectedColor);
-  if (idx >= 0) {
-    data[idx].items.push(...files);
-  } else {
-    data.push({ color: selectedColor, items: files });
-  }
-  // Sort by our fixed color order
-  data.sort((a, b) => COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color));
-  savePhotos(data);
-  res.json({ success: true, added: files.length, color: selectedColor, files });
+// アップロード処理
+app.post("/upload", upload.single("photo"), (req, res) => {
+ const { color } = req.body;
+ const photoPath = `/uploads/${req.file.filename}`;
+ let photos = [];
+ if (fs.existsSync(photosFile)) {
+   photos = JSON.parse(fs.readFileSync(photosFile));
+ }
+ photos.push({ color, url: photoPath });
+ fs.writeFileSync(photosFile, JSON.stringify(photos, null, 2));
+ res.json({ success: true });
 });
-
-// Delete endpoint (admin-only)
-
-app.post("/delete", (req, res) => {
-  const auth = req.headers.authorization || "";
-  if (auth.replace("Bearer ", "") !== ADMIN_PASSWORD) {
-    return res.status(403).json({ error: "Forbidden: incorrect password" });
-  }
-  const { color, filename } = req.body;
-  if (!color || !filename) {
-    return res.status(400).json({ error: "Missing color or filename" });
-  }
-  const data = loadPhotos();
-  const idx = data.findIndex(x => x.color === color);
-  if (idx === -1) return res.status(404).json({ error: "Color not found" });
-  // ファイル削除
-  const filePath = path.join(uploadDir, path.basename(filename));
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  // JSONから削除
-  data[idx].items = data[idx].items.filter(f => f !== filename);
-  savePhotos(data);
-  res.json({ success: true, deleted: filename });
+// JSONを提供
+app.get("/photos.json", (req, res) => {
+ if (!fs.existsSync(photosFile)) fs.writeFileSync(photosFile, "[]");
+ res.sendFile(photosFile);
 });
-
-// Get photos grouped by color
-app.get("/photos", (_req, res) => {
-  const data = loadPhotos();
-  // Only existing items; respect order
-  const ordered = COLOR_ORDER.map(c => data.find(x => x.color == c) || { color: c, items: [] });
-  res.json(ordered);
-});
-
-// ルートアクセス時に index.html を返す
-app.get("/", (req, res) => {
- res.sendFile(path.join(__dirname, "newpublic", "index.html"));
-});
-// サーバー起動
+// サーバ起動
 app.listen(PORT, () => {
- console.log(`＋ILLuSio running at http://localhost:${PORT}`);
+ console.log(`+ILLuSio running at http://localhost:${PORT}`);
+ console.log(`Your service is live 🎉`);
 });
