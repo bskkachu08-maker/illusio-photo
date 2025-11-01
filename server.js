@@ -11,7 +11,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.static(path.join(__dirname, "public")));
 // Password for admin upload
+
 const ADMIN_PASSWORD = "Chipi0503";
 
 // Ensure uploads directory exists
@@ -98,7 +100,7 @@ app.get("/photos", (_req, res) => {
 app.get("/", (req, res) => {
  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
+// サーバー起動
 app.listen(PORT, () => {
-  console.log(`+ILLuSio running at http://localhost:${PORT}`);
+ console.log(`＋ILLuSio running at http://localhost:${PORT}`);
 });
