@@ -1,47 +1,48 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>＋ILLuSio Photo Gallery</title>
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>＋ILLuSio Photo</title>
+<link rel="stylesheet" href="style.css">
+<style>
+   body { text-align: center; font-family: sans-serif; }
+   .color-section { margin-bottom: 40px; }
+   h2 { margin-top: 30px; }
+   img { width: 200px; margin: 5px; border-radius: 8px; box-shadow: 0 0 6px #ccc; }
+</style>
 </head>
 <body>
-<header>
 <h1>＋ILLuSio Photo</h1>
 <p>色ごとにアップロードされた写真をここで閲覧できます.</p>
-</header>
-<main>
+<p><a href="/admin.html">管理者ページへ</a></p>
 <div id="gallery"></div>
-</main>
-<footer>
-<a href="admin.html">管理者ページへ</a>
-</footer>
 <script>
-   // 写真一覧を取得して表示
-   async function loadPhotos() {
-     const res = await fetch("/photos");
-     const data = await res.json();
-     const gallery = document.getElementById("gallery");
-     gallery.innerHTML = "";
-     data.forEach(group => {
-       if (!group.items.length) return;
-       const section = document.createElement("section");
-       const h2 = document.createElement("h2");
-       h2.textContent = group.color;
-       section.appendChild(h2);
-       const div = document.createElement("div");
-       div.className = "photo-group";
-       group.items.forEach(path => {
+ async function loadPhotos() {
+   const res = await fetch("/photos");
+   const data = await res.json();
+   const gallery = document.getElementById("gallery");
+   gallery.innerHTML = "";
+   data.forEach(group => {
+     const section = document.createElement("div");
+     section.className = "color-section";
+     const title = document.createElement("h2");
+     title.textContent = group.color;
+     section.appendChild(title);
+     if (group.items.length === 0) {
+       const empty = document.createElement("p");
+       empty.textContent = "（まだ画像はありません）";
+       section.appendChild(empty);
+     } else {
+       group.items.forEach(file => {
          const img = document.createElement("img");
-         img.src = path;
-         div.appendChild(img);
+         img.src = file;
+         section.appendChild(img);
        });
-       section.appendChild(div);
-       gallery.appendChild(section);
-     });
-   }
-   loadPhotos();
+     }
+     gallery.appendChild(section);
+   });
+ }
+ loadPhotos();
 </script>
 </body>
 </html>
