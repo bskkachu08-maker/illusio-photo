@@ -7,24 +7,19 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<header>
 <h1>＋ILLuSio Necklace Designer</h1>
-</header>
-<main>
-<div id="canvas-area">
-<div id="wire"></div>
-<div id="drop-zone"></div>
+<p>右のパーツをドラッグして、中央のワイヤーに並べてください。</p>
+<div id="necklace-area">
+<canvas id="necklaceCanvas"></canvas>
 </div>
-</main>
-<button id="open-parts-btn">💠 パーツ一覧</button>
-<button id="save-btn">💎 このネックレスを保存</button>
-<div id="drawer">
-<div id="drawer-header">
-<h2>パーツ一覧</h2>
-<button id="close-drawer-btn">✕</button>
+<div id="buttons">
+<button id="saveBtn">💎 このネックレスを保存</button>
+<button id="partsBtn">💠 パーツ一覧</button>
 </div>
-<div id="parts"></div>
+<div id="partsPanel" class="hidden">
+<input type="file" id="uploadParts" multiple accept="image/*" />
+<div id="partsList"></div>
 </div>
-<script src="necklace.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
