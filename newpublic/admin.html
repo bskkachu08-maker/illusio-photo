@@ -24,6 +24,25 @@
 <label>写真を選択:</label>
 <input type="file" id="photos" multiple accept="image/*" required />
 <button type="submit">アップロード</button>
+
+<hr>
+<h3>写真削除</h3>
+<label>色カテゴリを選択:</label>
+<select id="deleteColor">
+<option value="赤">赤</option>
+<option value="ピンク">ピンク</option>
+<option value="青">青</option>
+<option value="緑">緑</option>
+<option value="白">白</option>
+<option value="黒">黒</option>
+</select>
+<br>
+<label>ファイル名（例: /uploads/1700000000_image.png）:</label>
+<input type="text" id="deleteFilename" placeholder="ファイル名を入力">
+<br>
+<button onclick="deletePhoto()">削除</button>
+<p id="deleteResult"></p>
+   
 </form>
 <p id="result"></p>
 <script>
