@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "newpublic")));
 // Password for admin upload
 
 const ADMIN_PASSWORD = "Chipi0503";
@@ -98,7 +98,7 @@ app.get("/photos", (_req, res) => {
 
 // ルートアクセス時に index.html を返す
 app.get("/", (req, res) => {
- res.sendFile(path.join(__dirname, "public", "index.html"));
+ res.sendFile(path.join(__dirname, "newpublic", "index.html"));
 });
 // サーバー起動
 app.listen(PORT, () => {
