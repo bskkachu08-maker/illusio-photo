@@ -54,10 +54,10 @@ button {
  border-radius: 5px;
  font-size: 16px;
 }
-/* パーツ一覧（2列＋横スクロール） */
+/* パーツ一覧：2列グリッド＋横スクロール */
 #partsPanel {
  position: fixed;
- bottom: -220px;
+ bottom: -230px;
  left: 0;
  right: 0;
  background: white;
@@ -73,8 +73,8 @@ button {
  display: grid;
  grid-template-columns: repeat(2, 1fr);
  gap: 10px;
- overflow-x: scroll;
- white-space: nowrap;
+ overflow-x: auto;
+ padding: 5px;
 }
 #partsList img {
  width: 80px;
