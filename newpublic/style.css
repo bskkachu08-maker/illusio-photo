@@ -1,1 +1,49 @@
-
+body {
+ font-family: "Hiragino Sans", sans-serif;
+ margin: 0;
+ padding: 20px;
+ background-color: #fafafa;
+ color: #333;
+ text-align: center;
+}
+h1 {
+ color: #444;
+ margin-bottom: 20px;
+}
+form {
+ display: flex;
+ flex-direction: column;
+ max-width: 400px;
+ margin: 0 auto;
+ gap: 10px;
+}
+input, select, button {
+ padding: 10px;
+ font-size: 1em;
+}
+button {
+ background-color: #222;
+ color: white;
+ border: none;
+ cursor: pointer;
+ transition: 0.2s;
+}
+button:hover {
+ background-color: #555;
+}
+#gallery section {
+ margin-bottom: 30px;
+}
+.photo-group {
+ display: flex;
+ flex-wrap: wrap;
+ justify-content: center;
+ gap: 10px;
+}
+.photo-group img {
+ width: 150px;
+ height: 150px;
+ object-fit: cover;
+ border-radius: 4px;
+ box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
