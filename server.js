@@ -66,8 +66,9 @@ function savePhotos(data) {
 
 // Upload endpoint (admin-only)
 app.post("/upload", upload.array("photos"), (req, res) => {
-  const auth = req.headers.authorization || "";
- if (auth.replace("Bearer ", "") !== ADMIN_PASSWORD) {
+  
+ const auth = req.headers.authorization || "";
+if (auth.replace("Bearer ", "") !== ADMIN_PASSWORD) {
  return res.status(403).json({ error: "Forbidden: incorrect password" });
 }
   const selectedColor = req.body.color;
