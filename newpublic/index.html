@@ -1,1 +1,47 @@
-
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>＋ILLuSio Photo Gallery</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+<h1>＋ILLuSio Photo</h1>
+<p>色ごとにアップロードされた写真をここで閲覧できます.</p>
+</header>
+<main>
+<div id="gallery"></div>
+</main>
+<footer>
+<a href="admin.html">管理者ページへ</a>
+</footer>
+<script>
+   // 写真一覧を取得して表示
+   async function loadPhotos() {
+     const res = await fetch("/photos");
+     const data = await res.json();
+     const gallery = document.getElementById("gallery");
+     gallery.innerHTML = "";
+     data.forEach(group => {
+       if (!group.items.length) return;
+       const section = document.createElement("section");
+       const h2 = document.createElement("h2");
+       h2.textContent = group.color;
+       section.appendChild(h2);
+       const div = document.createElement("div");
+       div.className = "photo-group";
+       group.items.forEach(path => {
+         const img = document.createElement("img");
+         img.src = path;
+         div.appendChild(img);
+       });
+       section.appendChild(div);
+       gallery.appendChild(section);
+     });
+   }
+   loadPhotos();
+</script>
+</body>
+</html>
