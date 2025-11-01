@@ -67,6 +67,26 @@
        result.textContent = `❌ 失敗: ${data.error || "不明なエラー"}`;
      }
    });
+   async function deletePhoto() {
+ const password = document.getElementById("password").value;
+ const color = document.getElementById("deleteColor").value;
+ const filename = document.getElementById("deleteFilename").value;
+ const res = await fetch("/delete", {
+   method: "POST",
+   headers: {
+     "Content-Type": "application/json",
+     Authorization: password
+   },
+   body: JSON.stringify({ color, filename })
+ });
+ const result = await res.json();
+ const msg = document.getElementById("deleteResult");
+ if (result.success) {
+   msg.innerHTML = `✅ 削除成功: ${result.deleted}`;
+ } else {
+   msg.innerHTML = `❌ 失敗: ${result.error || "不明なエラー"}`;
+ }
+}
 </script>
 </body>
 </html>
