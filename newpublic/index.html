@@ -1,48 +1,29 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>＋ILLuSio Photo</title>
-<link rel="stylesheet" href="style.css">
-<style>
-   body { text-align: center; font-family: sans-serif; }
-   .color-section { margin-bottom: 40px; }
-   h2 { margin-top: 30px; }
-   img { width: 200px; margin: 5px; border-radius: 8px; box-shadow: 0 0 6px #ccc; }
-</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>＋ILLuSio Necklace Designer</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<h1>＋ILLuSio Photo</h1>
-<p>色ごとにアップロードされた写真をここで閲覧できます.</p>
-<p><a href="/admin.html">管理者ページへ</a></p>
-<div id="gallery"></div>
-<script>
- async function loadPhotos() {
-   const res = await fetch("/photos");
-   const data = await res.json();
-   const gallery = document.getElementById("gallery");
-   gallery.innerHTML = "";
-   data.forEach(group => {
-     const section = document.createElement("div");
-     section.className = "color-section";
-     const title = document.createElement("h2");
-     title.textContent = group.color;
-     section.appendChild(title);
-     if (group.items.length === 0) {
-       const empty = document.createElement("p");
-       empty.textContent = "（まだ画像はありません）";
-       section.appendChild(empty);
-     } else {
-       group.items.forEach(file => {
-         const img = document.createElement("img");
-         img.src = file;
-         section.appendChild(img);
-       });
-     }
-     gallery.appendChild(section);
-   });
- }
- loadPhotos();
-</script>
+<header>
+<h1>＋ILLuSio Necklace Designer</h1>
+<p>右のパーツをドラッグして、中央のワイヤーに並べてください.</p>
+</header>
+<main>
+<div id="canvas-area">
+<div id="wire"></div>
+<div id="drop-zone"></div>
+</div>
+<aside id="parts-panel">
+<h2>パーツ一覧</h2>
+<div id="parts"></div>
+</aside>
+</main>
+<footer>
+<button id="save-btn">このネックレスを保存する💎</button>
+</footer>
+<script src="necklace.js"></script>
 </body>
 </html>
