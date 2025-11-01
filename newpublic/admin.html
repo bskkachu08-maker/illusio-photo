@@ -1,1 +1,53 @@
-
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>＋ILLuSio Admin</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<h1>＋ILLuSio 管理者ページ</h1>
+<form id="uploadForm">
+<label>管理者パスワード:</label>
+<input type="password" id="password" placeholder="Chipi053" required />
+<label>色カテゴリを選択:</label>
+<select id="color">
+<option value="赤">赤</option>
+<option value="ピンク">ピンク</option>
+<option value="青">青</option>
+<option value="緑">緑</option>
+<option value="白">白</option>
+<option value="黒">黒</option>
+<option value="その他">その他</option>
+</select>
+<label>写真を選択:</label>
+<input type="file" id="photos" multiple accept="image/*" required />
+<button type="submit">アップロード</button>
+</form>
+<p id="result"></p>
+<script>
+   document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+     e.preventDefault();
+     const password = document.getElementById("password").value;
+     const color = document.getElementById("color").value;
+     const files = document.getElementById("photos").files;
+     const formData = new FormData();
+     formData.append("color", color);
+     for (const f of files) formData.append("photos", f);
+     const res = await fetch("/upload", {
+       method: "POST",
+       headers: { Authorization: "Bearer " + password },
+       body: formData,
+     });
+     const data = await res.json();
+     const result = document.getElementById("result");
+     if (data.success) {
+       result.textContent = `✅ ${data.added}枚アップロード成功 (${data.color})`;
+     } else {
+       result.textContent = `❌ 失敗: ${data.error || "不明なエラー"}`;
+     }
+   });
+</script>
+</body>
+</html>
