@@ -89,6 +89,29 @@ if (auth.replace("Bearer ", "") !== ADMIN_PASSWORD) {
   res.json({ success: true, added: files.length, color: selectedColor, files });
 });
 
+// Delete endpoint (admin-only)
+
+app.post("/delete", (req, res) => {
+  const auth = req.headers.authorization || "";
+  if (auth.replace("Bearer ", "") !== ADMIN_PASSWORD) {
+    return res.status(403).json({ error: "Forbidden: incorrect password" });
+  }
+  const { color, filename } = req.body;
+  if (!color || !filename) {
+    return res.status(400).json({ error: "Missing color or filename" });
+  }
+  const data = loadPhotos();
+  const idx = data.findIndex(x => x.color === color);
+  if (idx === -1) return res.status(404).json({ error: "Color not found" });
+  // ファイル削除
+  const filePath = path.join(uploadDir, path.basename(filename));
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  // JSONから削除
+  data[idx].items = data[idx].items.filter(f => f !== filename);
+  savePhotos(data);
+  res.json({ success: true, deleted: filename });
+});
+
 // Get photos grouped by color
 app.get("/photos", (_req, res) => {
   const data = loadPhotos();
