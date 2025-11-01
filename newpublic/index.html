@@ -5,10 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>＋ILLuSio Necklace Designer</title>
 <link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
+<header>
 <h1>＋ILLuSio Necklace Designer</h1>
-<p>右のパーツをドラッグして、中央のワイヤーに並べてください。</p>
+<button id="addPartsBtn">＋ パーツ追加</button>
+<input type="file" id="uploadParts" accept="image/*" multiple hidden>
+</header>
+<main>
+<p>パーツをドラッグして、中央のワイヤーに並べてください。</p>
 <div id="necklace-area">
 <canvas id="necklaceCanvas"></canvas>
 </div>
@@ -17,9 +23,10 @@
 <button id="partsBtn">💠 パーツ一覧</button>
 </div>
 <div id="partsPanel" class="hidden">
-<input type="file" id="uploadParts" multiple accept="image/*" />
+<h3>パーツ一覧</h3>
 <div id="partsList"></div>
 </div>
+</main>
 <script src="script.js"></script>
 </body>
 </html>
