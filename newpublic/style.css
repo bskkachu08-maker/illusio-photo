@@ -1,49 +1,88 @@
 body {
  font-family: "Hiragino Sans", sans-serif;
  margin: 0;
- padding: 20px;
- background-color: #fafafa;
+ background-color: #f4f4f4;
  color: #333;
+}
+header {
  text-align: center;
+ padding: 20px;
 }
-h1 {
- color: #444;
- margin-bottom: 20px;
-}
-form {
+main {
  display: flex;
- flex-direction: column;
- max-width: 400px;
- margin: 0 auto;
- gap: 10px;
+ justify-content: center;
+ align-items: flex-start;
+ gap: 40px;
+ padding: 20px;
 }
-input, select, button {
+#canvas-area {
+ position: relative;
+ width: 500px;
+ height: 500px;
+}
+#wire {
+ position: absolute;
+ width: 480px;
+ height: 480px;
+ border: 2px solid #aaa;
+ border-radius: 50%;
+ top: 10px;
+ left: 10px;
+ box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.8),
+             0 0 6px rgba(0, 0, 0, 0.3);
+ background: radial-gradient(circle at center, #ddd 0%, #bbb 100%);
+}
+#drop-zone {
+ position: absolute;
+ width: 500px;
+ height: 500px;
+ border-radius: 50%;
+ overflow: visible;
+}
+#parts-panel {
+ width: 220px;
+ background: white;
+ border-radius: 8px;
+ box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
  padding: 10px;
- font-size: 1em;
+ overflow-y: auto;
+ max-height: 500px;
 }
-button {
- background-color: #222;
- color: white;
+#parts img {
+ width: 90px;
+ height: 90px;
+ object-fit: cover;
+ border-radius: 6px;
+ margin: 5px;
+ cursor: grab;
+ transition: transform 0.2s;
+}
+#parts img:hover {
+ transform: scale(1.05);
+}
+.draggable {
+ position: absolute;
+ width: 80px;
+ height: 80px;
+ border-radius: 50%;
+ object-fit: cover;
+ cursor: move;
+ pointer-events: all;
+}
+footer {
+ text-align: center;
+ padding: 20px;
+}
+#save-btn {
+ background: #333;
+ color: #fff;
+ font-size: 1.1em;
+ padding: 12px 25px;
  border: none;
+ border-radius: 6px;
  cursor: pointer;
  transition: 0.2s;
 }
-button:hover {
- background-color: #555;
-}
-#gallery section {
- margin-bottom: 30px;
-}
-.photo-group {
- display: flex;
- flex-wrap: wrap;
- justify-content: center;
- gap: 10px;
-}
-.photo-group img {
- width: 150px;
- height: 150px;
- object-fit: cover;
- border-radius: 4px;
- box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+#save-btn:hover {
+ background: #555;
 }
