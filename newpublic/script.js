@@ -1,87 +1,64 @@
 const canvas = document.getElementById("necklaceCanvas");
 const ctx = canvas.getContext("2d");
-const saveBtn = document.getElementById("saveBtn");
-const addPartsPage = document.getElementById("addPartsPage");
-const partsBtn = document.getElementById("partsBtn");
-const partsPanel = document.getElementById("partsPanel");
-const partsList = document.getElementById("partsList");
-const necklaceArea = document.getElementById("necklace-area");
-canvas.width = 400;
-canvas.height = 400;
-// ワイヤー1本
+canvas.width = 420;
+canvas.height = 420;
 function drawNecklace() {
- ctx.clearRect(0, 0, canvas.width, canvas.height);
+ ctx.clearRect(0, 0, 420, 420);
  ctx.beginPath();
- ctx.arc(200, 200, 150, 0, Math.PI * 2);
+ ctx.arc(210, 210, 190, 0, Math.PI * 2);
  ctx.strokeStyle = "silver";
  ctx.lineWidth = 3;
  ctx.stroke();
 }
 drawNecklace();
-// ページ遷移
-addPartsPage.addEventListener("click", () => {
- window.location.href = "admin.html";
-});
-// パーツ一覧開閉
-partsBtn.addEventListener("click", () => {
- partsPanel.classList.toggle("active");
-});
-// JSONからパーツ読み込み
+// ボタン
+document.getElementById("adminBtn").onclick = () => (window.location.href = "admin.html");
+const partsPanel = document.getElementById("partsPanel");
+document.getElementById("showParts").onclick = () => partsPanel.classList.add("open");
+document.getElementById("closePanel").onclick = () => partsPanel.classList.remove("open");
+// パーツ一覧読み込み
 async function loadParts() {
  const res = await fetch("/photos.json");
- const data = await res.json();
- partsList.innerHTML = "";
- data.forEach((p) => {
+ const parts = await res.json();
+ const list = document.getElementById("partsList");
+ list.innerHTML = "";
+ parts.forEach(p => {
    const img = document.createElement("img");
-   img.src = p.url;
-   img.alt = p.color;
-   img.addEventListener("click", () => {
-     const clone = img.cloneNode();
-     clone.style.left = "180px";
-     clone.style.top = "180px";
-     clone.className = "part";
-     necklaceArea.appendChild(clone);
-     makeDraggable(clone);
-   });
-   partsList.appendChild(img);
+   img.src = p.thumb;
+   img.onclick = () => {
+     const bead = document.createElement("img");
+     bead.src = p.bead;
+     bead.className = "part";
+     bead.style.left = "180px";
+     bead.style.top = "180px";
+     document.getElementById("necklace-area").appendChild(bead);
+     makeDraggable(bead);
+   };
+   list.appendChild(img);
  });
 }
 loadParts();
-// ドラッグ操作
+// ドラッグ機能
 function makeDraggable(el) {
- let offsetX, offsetY, isDragging = false;
- el.addEventListener("mousedown", startDrag);
- el.addEventListener("touchstart", startDrag, { passive: true });
- el.addEventListener("mousemove", onDrag);
- el.addEventListener("touchmove", onDrag, { passive: true });
- el.addEventListener("mouseup", endDrag);
- el.addEventListener("touchend", endDrag);
- function startDrag(e) {
-   isDragging = true;
-   const rect = el.getBoundingClientRect();
-   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-   offsetX = clientX - rect.left;
-   offsetY = clientY - rect.top;
- }
- function onDrag(e) {
-   if (!isDragging) return;
-   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-   const parentRect = necklaceArea.getBoundingClientRect();
-   el.style.left = `${clientX - parentRect.left - offsetX}px`;
-   el.style.top = `${clientY - parentRect.top - offsetY}px`;
- }
- function endDrag() {
-   isDragging = false;
- }
-}
-// 保存機能
-saveBtn.addEventListener("click", () => {
- html2canvas(necklaceArea).then((canvasSave) => {
-   const link = document.createElement("a");
-   link.download = "necklace.png";
-   link.href = canvasSave.toDataURL("image/png");
-   link.click();
+ let isDown = false, offsetX, offsetY;
+ el.addEventListener("mousedown", e => {
+   isDown = true;
+   offsetX = e.offsetX;
+   offsetY = e.offsetY;
  });
-});
+ window.addEventListener("mousemove", e => {
+   if (!isDown) return;
+   el.style.left = e.pageX - canvas.offsetLeft - offsetX + "px";
+   el.style.top = e.pageY - canvas.offsetTop - offsetY + "px";
+ });
+ window.addEventListener("mouseup", () => (isDown = false));
+}
+// 保存
+document.getElementById("saveNecklace").onclick = async () => {
+ const area = document.getElementById("necklace-area");
+ const img = await html2canvas(area, { backgroundColor: "#fff" });
+ const link = document.createElement("a");
+ link.href = img.toDataURL("image/png");
+ link.download = "necklace.png";
+ link.click();
+};
