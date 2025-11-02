@@ -1,54 +1,77 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>＋ILLuSio パーツ追加</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 <h1>＋ILLuSio パーツ追加ページ</h1>
 <form id="uploadForm">
-<label>管理者パスワード:</label><br>
-<input type="password" id="password" required><br><br>
-<label>色カテゴリを選択:</label><br>
-<select id="color">
-<option value="赤">赤</option>
-<option value="青">青</option>
-<option value="緑">緑</option>
-<option value="黄">黄</option>
-<option value="白">白</option>
-</select><br><br>
-<label>パーツ画像を選択:</label><br>
-<input type="file" id="photo" accept="image/*" required><br><br>
+<p>
+<label>管理者パスワード:</label><br/>
+<input type="password" id="password" required/>
+</p>
+<p>
+<label>色カテゴリ:</label><br/>
+<select id="color" required>
+<option>赤</option>
+<option>ピンク</option>
+<option>青</option>
+<option>緑</option>
+<option>白</option>
+<option>紫</option>
+<option>ターコイズ</option>
+<option>透明</option>
+<option>金色</option>
+<option>シルバー</option>
+<option>黒</option>
+<option>その他</option>
+</select>
+</p>
+<p>
+<label>一覧用の写真（複数ビーズ）:</label><br/>
+<input type="file" id="thumb" accept="image/*" required/>
+</p>
+<p>
+<label>配置用の写真（1粒ビーズ）:</label><br/>
+<input type="file" id="bead" accept="image/*" required/>
+</p>
 <button type="submit">アップロード</button>
 </form>
 <p id="message"></p>
+<p><a href="/">← デザイン画面へ戻る</a></p>
 <script>
+   // 管理者パスワードは指定通り「Chipi0503」
+   const ADMIN_PASS = "Chipi0503";
    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
      e.preventDefault();
-     const password = document.getElementById("password").value;
+     const pw = document.getElementById("password").value;
      const color = document.getElementById("color").value;
-     const file = document.getElementById("photo").files[0];
-     const message = document.getElementById("message");
-     if (password !== "Chipi053") {
-       message.textContent = "❌ パスワードが違います";
-       message.style.color = "red";
+     const thumb = document.getElementById("thumb").files[0];
+     const bead  = document.getElementById("bead").files[0];
+     const msg = document.getElementById("message");
+     if (pw !== ADMIN_PASS) {
+       msg.textContent = "❌ パスワードが違います";
+       msg.style.color = "red";
        return;
      }
-     const formData = new FormData();
-     formData.append("color", color);
-     formData.append("photo", file);
-     const res = await fetch("/upload", {
-       method: "POST",
-       body: formData,
-     });
-     if (res.ok) {
-       message.textContent = `✅ ${color}パーツを追加しました`;
-       message.style.color = "green";
-     } else {
-       message.textContent = "❌ アップロード失敗";
-       message.style.color = "red";
+     const fd = new FormData();
+     fd.append("color", color);
+     fd.append("thumb", thumb);
+     fd.append("bead", bead);
+     try {
+       const res = await fetch("/upload", { method: "POST", body: fd });
+       if (!res.ok) throw new Error();
+       msg.textContent = `✅ 「${color}」パーツを登録しました`;
+       msg.style.color = "green";
+       // 入力リセット
+       document.getElementById("thumb").value = "";
+       document.getElementById("bead").value  = "";
+     } catch {
+       msg.textContent = "❌ アップロード失敗";
+       msg.style.color = "red";
      }
    });
 </script>
