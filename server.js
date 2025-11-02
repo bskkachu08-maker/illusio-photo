@@ -1,59 +1,56 @@
+// ===== server.js =====
 import express from "express";
-import multer from "multer";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import multer from "multer";
 const app = express();
-const PORT = process.env.PORT || 3000; // Render対応
-// 静的ファイル
-app.use(express.static(path.join(__dirname, "public")));
-// JSONファイル（存在しなければ空配列を作成）
-const photosFile = path.join(__dirname, "photos.json");
-if (!fs.existsSync(photosFile)) fs.writeFileSync(photosFile, "[]");
-// アップロード先ディレクトリ
-const uploadDir = path.join(__dirname, "public", "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-// multer: 2フィールド（thumb=一覧用, bead=配置用）
+const PORT = process.env.PORT || 10000;
+// ---- newpublic をルートに設定 ----
+app.use(express.static("newpublic"));
+app.use(express.json());
+// ---- 写真保存フォルダ設定 ----
+const uploadDir = path.join(process.cwd(), "newpublic", "uploads");
+if (!fs.existsSync(uploadDir)) {
+ fs.mkdirSync(uploadDir, { recursive: true });
+}
 const storage = multer.diskStorage({
- destination: (_req, _file, cb) => cb(null, uploadDir),
- filename: (_req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+ destination: function (req, file, cb) {
+   cb(null, uploadDir);
+ },
+ filename: function (req, file, cb) {
+   cb(null, Date.now() + "-" + file.originalname);
+ },
 });
 const upload = multer({ storage });
-// パーツ登録（色 + 2画像）
-app.post(
- "/upload",
- upload.fields([
-   { name: "thumb", maxCount: 1 },
-   { name: "bead", maxCount: 1 }
- ]),
- (req, res) => {
-   try {
-     const { color } = req.body;
-     if (!req.files?.thumb?.[0] || !req.files?.bead?.[0]) {
-       return res.status(400).json({ success: false, message: "thumb と bead を送ってください" });
-     }
-     const thumbPath = `/uploads/${req.files.thumb[0].filename}`;
-     const beadPath  = `/uploads/${req.files.bead[0].filename}`;
-     const json = JSON.parse(fs.readFileSync(photosFile));
-     json.push({ color, thumb: thumbPath, bead: beadPath });
-     fs.writeFileSync(photosFile, JSON.stringify(json, null, 2));
-     res.json({ success: true });
-   } catch (e) {
-     console.error(e);
-     res.status(500).json({ success: false, message: "upload error" });
-   }
+// ---- photos.json のパス ----
+const photosPath = path.join(process.cwd(), "photos.json");
+// ---- 写真アップロードAPI ----
+app.post("/upload", upload.single("photo"), (req, res) => {
+ const password = req.body.password;
+ if (password !== "Chipi053") {
+   return res.status(403).send("Forbidden: incorrect password");
  }
-);
-// JSON提供
-app.get("/photos.json", (_req, res) => {
- res.sendFile(photosFile);
+ const color = req.body.color;
+ const filename = req.file.filename;
+ let photos = [];
+ if (fs.existsSync(photosPath)) {
+   photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
+ }
+ photos.push({ color, filename });
+ fs.writeFileSync(photosPath, JSON.stringify(photos, null, 2));
+ res.send("✅ 1枚アップロード成功 (" + color + ")");
 });
-// ルート
-app.get("/", (_req, res) => {
- res.sendFile(path.join(__dirname, "public", "index.html"));
+// ---- 写真一覧を返すAPI ----
+app.get("/photos", (req, res) => {
+ if (fs.existsSync(photosPath)) {
+   const photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
+   res.json(photos);
+ } else {
+   res.json([]);
+ }
 });
+// ---- サーバー起動 ----
 app.listen(PORT, () => {
- console.log(`＋ILLuSio running at http://localhost:${PORT}`);
+ console.log(`+ILLuSio running at http://localhost:${PORT}`);
+ console.log(`Your service is live ✨`);
 });
