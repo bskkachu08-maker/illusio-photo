@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>＋ILLuSio Necklace Designer</title>
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -13,17 +13,40 @@
 <button id="addPartsPage">＋ パーツ追加</button>
 </header>
 <main>
-<p>パーツをドラッグして、中央のワイヤーに並べてください。</p>
+<p>パーツをドラッグして、中央のワイヤーに並べてください.</p>
 <div id="necklace-area">
 <canvas id="necklaceCanvas"></canvas>
+<!-- 配置パーツはこの中に<img>で追加されます -->
 </div>
 <div id="buttons">
 <button id="saveBtn">💎 このネックレスを保存</button>
 <button id="partsBtn">💠 パーツ一覧</button>
 </div>
-<div id="partsPanel" class="hidden">
+<!-- 下からスライドする一覧（2列＋横スクロール） -->
+<div id="partsPanel" class="drawer">
+<div class="drawer-head">
 <h3>パーツ一覧</h3>
-<div id="partsList"></div>
+<div class="filter">
+<label for="colorFilter">色:</label>
+<select id="colorFilter">
+<option value="all">すべて</option>
+<option value="赤">赤</option>
+<option value="ピンク">ピンク</option>
+<option value="青">青</option>
+<option value="緑">緑</option>
+<option value="白">白</option>
+<option value="紫">紫</option>
+<option value="ターコイズ">ターコイズ</option>
+<option value="透明">透明</option>
+<option value="金色">金色</option>
+<option value="シルバー">シルバー</option>
+<option value="黒">黒</option>
+<option value="その他">その他</option>
+</select>
+</div>
+<button id="closePanel">✕</button>
+</div>
+<div id="partsList" class="grid2"></div>
 </div>
 </main>
 <script src="script.js"></script>
