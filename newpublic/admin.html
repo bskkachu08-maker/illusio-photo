@@ -1,79 +1,114 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>＋ILLuSio パーツ追加</title>
-<link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>+ILLuSio パーツ追加ページ</title>
+<style>
+   body {
+     font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+     background-color: #fafafa;
+     text-align: center;
+     padding: 40px 10px;
+   }
+   h1 {
+     font-size: 28px;
+     margin-bottom: 20px;
+   }
+   form {
+     display: inline-block;
+     background: white;
+     padding: 25px 35px;
+     border-radius: 10px;
+     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+   }
+   label {
+     display: block;
+     margin-top: 12px;
+     font-weight: 600;
+   }
+   input, select, button {
+     margin-top: 6px;
+     font-size: 15px;
+     padding: 6px 10px;
+   }
+   button {
+     background-color: #222;
+     color: white;
+     border: none;
+     border-radius: 6px;
+     padding: 10px 20px;
+     margin-top: 18px;
+     cursor: pointer;
+   }
+   button:hover {
+     background-color: #444;
+   }
+   #result {
+     margin-top: 20px;
+     font-size: 16px;
+     font-weight: bold;
+   }
+   a {
+     display: block;
+     margin-top: 20px;
+     color: #444;
+     text-decoration: none;
+   }
+   a:hover {
+     text-decoration: underline;
+   }
+</style>
 </head>
 <body>
-<h1>＋ILLuSio パーツ追加ページ</h1>
-<form id="uploadForm">
-<p>
-<label>管理者パスワード:</label><br/>
-<input type="password" id="password" required/>
-</p>
-<p>
-<label>色カテゴリ:</label><br/>
-<select id="color" required>
-<option>赤</option>
-<option>ピンク</option>
-<option>青</option>
-<option>緑</option>
-<option>白</option>
-<option>紫</option>
-<option>ターコイズ</option>
-<option>透明</option>
-<option>金色</option>
-<option>シルバー</option>
-<option>黒</option>
-<option>その他</option>
+<h1>+ILLuSio パーツ追加ページ</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+<label>管理者パスワード:</label>
+<input type="password" name="password" required>
+<label>色カテゴリ:</label>
+<select name="color" required>
+<option value="赤">赤</option>
+<option value="青">青</option>
+<option value="黄">黄</option>
+<option value="緑">緑</option>
+<option value="白">白</option>
+<option value="黒">黒</option>
 </select>
-</p>
-<p>
-<label>一覧用の写真（複数ビーズ）:</label><br/>
-<input type="file" id="thumb" accept="image/*" required/>
-</p>
-<p>
-<label>配置用の写真（1粒ビーズ）:</label><br/>
-<input type="file" id="bead" accept="image/*" required/>
-</p>
+<label>一覧用の写真（複数ビーズ）:</label>
+<input type="file" name="photoList" accept="image/*" required>
+<label>配置用の写真（1粒ビーズ）:</label>
+<input type="file" name="photoSingle" accept="image/*" required>
 <button type="submit">アップロード</button>
 </form>
-<p id="message"></p>
-<p><a href="/">← デザイン画面へ戻る</a></p>
+<div id="result"></div>
+<a href="index.html">← デザイン画面へ戻る</a>
 <script>
-   // 管理者パスワードは指定通り「Chipi0503」
-   const ADMIN_PASS = "Chipi0503";
-   document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+   const form = document.getElementById("uploadForm");
+   const result = document.getElementById("result");
+   form.addEventListener("submit", async (e) => {
      e.preventDefault();
-     const pw = document.getElementById("password").value;
-     const color = document.getElementById("color").value;
-     const thumb = document.getElementById("thumb").files[0];
-     const bead  = document.getElementById("bead").files[0];
-     const msg = document.getElementById("message");
-     if (pw !== ADMIN_PASS) {
-       msg.textContent = "❌ パスワードが違います";
-       msg.style.color = "red";
-       return;
-     }
-     const fd = new FormData();
-     fd.append("color", color);
-     fd.append("thumb", thumb);
-     fd.append("bead", bead);
+     result.textContent = "⏳ アップロード中…";
+     const formData = new FormData(form);
      try {
-       const res = await fetch("/upload", { method: "POST", body: fd });
-       if (!res.ok) throw new Error();
-       msg.textContent = `✅ 「${color}」パーツを登録しました`;
-       msg.style.color = "green";
-       // 入力リセット
-       document.getElementById("thumb").value = "";
-       document.getElementById("bead").value  = "";
-     } catch {
-       msg.textContent = "❌ アップロード失敗";
-       msg.style.color = "red";
+       const response = await fetch("/upload", {
+         method: "POST",
+         body: formData,
+       });
+       const text = await response.text();
+       if (response.ok) {
+         result.innerHTML = "✅ " + text;
+         result.style.color = "green";
+       } else {
+         result.innerHTML = "❌ アップロード失敗<br>" + text;
+         result.style.color = "red";
+       }
+     } catch (err) {
+       console.error(err);
+       result.innerHTML = "⚠️ 通信エラー: " + err.message;
+       result.style.color = "red";
      }
    });
 </script>
 </body>
+</html>
 </html>
