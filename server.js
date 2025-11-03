@@ -5,13 +5,19 @@ import path from "path";
 import multer from "multer";
 const app = express();
 const PORT = process.env.PORT || 10000;
-// ---- newpublic をルートに設定 ----
+// ==== 静的フォルダ設定 ====
 app.use(express.static("newpublic"));
 app.use(express.json());
-// ---- 写真保存フォルダ設定 ----
+// ==== アップロード先設定 ====
 const uploadDir = path.join(process.cwd(), "newpublic", "uploads");
-if (!fs.existsSync(uploadDir)) {
- fs.mkdirSync(uploadDir, { recursive: true });
+// Render環境でも確実にフォルダを作成
+try {
+ if (!fs.existsSync(uploadDir)) {
+   fs.mkdirSync(uploadDir, { recursive: true });
+   console.log("✅ uploadsフォルダ作成:", uploadDir);
+ }
+} catch (err) {
+ console.error("❌ uploadsフォルダ作成失敗:", err);
 }
 const storage = multer.diskStorage({
  destination: function (req, file, cb) {
@@ -22,9 +28,9 @@ const storage = multer.diskStorage({
  },
 });
 const upload = multer({ storage });
-// ---- photos.json のパス ----
+// ==== photos.json の場所 ====
 const photosPath = path.join(process.cwd(), "photos.json");
-// ---- 写真アップロードAPI ----
+// ==== 写真アップロードAPI ====
 app.post("/upload", upload.single("photo"), (req, res) => {
  const password = req.body.password;
  if (password !== "Chipi053") {
@@ -33,23 +39,34 @@ app.post("/upload", upload.single("photo"), (req, res) => {
  const color = req.body.color;
  const filename = req.file.filename;
  let photos = [];
- if (fs.existsSync(photosPath)) {
-   photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
+ try {
+   if (fs.existsSync(photosPath)) {
+     photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
+   }
+   photos.push({ color, filename });
+   fs.writeFileSync(photosPath, JSON.stringify(photos, null, 2));
+   console.log(`✅ 写真アップロード成功: ${filename} (${color})`);
+   res.send("✅ 1枚アップロード成功 (" + color + ")");
+ } catch (error) {
+   console.error("❌ 写真保存エラー:", error);
+   res.status(500).send("Server error: could not save photo");
  }
- photos.push({ color, filename });
- fs.writeFileSync(photosPath, JSON.stringify(photos, null, 2));
- res.send("✅ 1枚アップロード成功 (" + color + ")");
 });
-// ---- 写真一覧を返すAPI ----
+// ==== 写真一覧API ====
 app.get("/photos", (req, res) => {
- if (fs.existsSync(photosPath)) {
-   const photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
-   res.json(photos);
- } else {
-   res.json([]);
+ try {
+   if (fs.existsSync(photosPath)) {
+     const photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
+     res.json(photos);
+   } else {
+     res.json([]);
+   }
+ } catch (error) {
+   console.error("❌ /photos 読み込みエラー:", error);
+   res.status(500).json([]);
  }
 });
-// ---- サーバー起動 ----
+// ==== サーバー起動 ====
 app.listen(PORT, () => {
  console.log(`+ILLuSio running at http://localhost:${PORT}`);
  console.log(`Your service is live ✨`);
