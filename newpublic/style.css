@@ -3,22 +3,46 @@ body {
  font-family: "Hiragino Sans", sans-serif;
  text-align: center;
  margin: 0;
+ height: 100vh;
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
+}
+header {
+ position: relative;
+ padding-top: 10px;
 }
 .logo {
  font-size: 2rem;
- margin: 1.5rem 0;
+ margin: 0.5rem 0 0;
  font-weight: bold;
+}
+.add-part {
+ position: absolute;
+ right: 10px;
+ top: 10px;
+ background: #fff;
+ color: #333;
+ border: 1px solid #aaa;
+ border-radius: 6px;
+ padding: 5px 10px;
+}
+.main-area {
+ flex-grow: 1;
+ display: flex;
+ justify-content: center;
+ align-items: center;
 }
 .necklace-area {
  display: flex;
  justify-content: center;
- margin-top: 10px;
+ align-items: center;
 }
 .bottom-buttons {
  display: flex;
  justify-content: center;
  gap: 10px;
- margin-top: 15px;
+ padding: 15px 0;
 }
 button {
  background-color: #333;
@@ -28,16 +52,7 @@ button {
  border-radius: 6px;
  font-size: 0.9rem;
 }
-.add-part {
- position: fixed;
- right: 10px;
- top: 10px;
- background: #fff;
- color: #333;
- border: 1px solid #aaa;
- border-radius: 6px;
- padding: 5px 10px;
-}
+/* モーダル関連 */
 .modal {
  position: fixed;
  top: 0; left: 0; right: 0; bottom: 0;
