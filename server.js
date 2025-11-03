@@ -1,58 +1,60 @@
-// ===== server.js =====
 import express from "express";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
 const app = express();
 const PORT = process.env.PORT || 10000;
-// ==== 静的フォルダ設定 ====
 app.use(express.static("newpublic"));
 app.use(express.json());
-// ==== アップロード先設定 ====
-const uploadDir = path.join(process.cwd(), "newpublic", "uploads");
-// Render環境でも確実にフォルダを作成
+// ✅ Renderで書き込み可能な場所
+const uploadDir = path.join("/tmp", "uploads");
+const photosPath = path.join("/tmp", "photos.json");
+// フォルダ作成
 try {
  if (!fs.existsSync(uploadDir)) {
    fs.mkdirSync(uploadDir, { recursive: true });
-   console.log("✅ uploadsフォルダ作成:", uploadDir);
+   console.log("✅ /tmp/uploads フォルダ作成完了");
  }
 } catch (err) {
  console.error("❌ uploadsフォルダ作成失敗:", err);
 }
+// multer設定（複数ファイル対応）
 const storage = multer.diskStorage({
- destination: function (req, file, cb) {
-   cb(null, uploadDir);
- },
- filename: function (req, file, cb) {
-   cb(null, Date.now() + "-" + file.originalname);
- },
+ destination: (req, file, cb) => cb(null, uploadDir),
+ filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
-// ==== photos.json の場所 ====
-const photosPath = path.join(process.cwd(), "photos.json");
-// ==== 写真アップロードAPI ====
-app.post("/upload", upload.single("photo"), (req, res) => {
+// ==== 2枚同時アップロード ====
+app.post("/upload", upload.fields([{ name: "photoList" }, { name: "photoSingle" }]), (req, res) => {
  const password = req.body.password;
  if (password !== "Chipi053") {
    return res.status(403).send("Forbidden: incorrect password");
  }
  const color = req.body.color;
- const filename = req.file.filename;
+ const listFile = req.files["photoList"] ? req.files["photoList"][0].filename : null;
+ const singleFile = req.files["photoSingle"] ? req.files["photoSingle"][0].filename : null;
+ if (!listFile || !singleFile) {
+   return res.status(400).send("Missing file(s)");
+ }
  let photos = [];
  try {
    if (fs.existsSync(photosPath)) {
      photos = JSON.parse(fs.readFileSync(photosPath, "utf8"));
    }
-   photos.push({ color, filename });
+   photos.push({
+     color,
+     listFile,
+     singleFile,
+   });
    fs.writeFileSync(photosPath, JSON.stringify(photos, null, 2));
-   console.log(`✅ 写真アップロード成功: ${filename} (${color})`);
-   res.send("✅ 1枚アップロード成功 (" + color + ")");
+   console.log(`✅ パーツアップロード成功: ${listFile}, ${singleFile} (${color})`);
+   res.send("✅ パーツアップロード成功 (" + color + ")");
  } catch (error) {
-   console.error("❌ 写真保存エラー:", error);
+   console.error("❌ パーツ保存エラー:", error);
    res.status(500).send("Server error: could not save photo");
  }
 });
-// ==== 写真一覧API ====
+// ==== 一覧取得 ====
 app.get("/photos", (req, res) => {
  try {
    if (fs.existsSync(photosPath)) {
