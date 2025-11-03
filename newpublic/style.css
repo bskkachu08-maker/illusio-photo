@@ -1,70 +1,64 @@
 body {
- font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+ background: #f7f7f7;
+ font-family: "Hiragino Sans", sans-serif;
  text-align: center;
- background: #f5f5f5;
  margin: 0;
 }
-header {
+.logo {
+ font-size: 2rem;
+ margin: 1.5rem 0;
+ font-weight: bold;
+}
+.necklace-area {
  display: flex;
- justify-content: space-between;
- align-items: center;
- background: white;
- padding: 10px 16px;
- border-bottom: 1px solid #ccc;
+ justify-content: center;
+ margin-top: 10px;
 }
-#necklace-area {
- position: relative;
- width: 90vw;
- max-width: 420px;
- margin: 20px auto;
-}
-#necklaceCanvas {
- width: 100%;
- aspect-ratio: 1/1;
- border: 3px solid silver;
- border-radius: 50%;
- background: transparent;
-}
-.part {
- position: absolute;
- width: 60px;
- height: 60px;
- object-fit: cover;
- cursor: grab;
-}
-.buttons {
+.bottom-buttons {
  display: flex;
  justify-content: center;
  gap: 10px;
- margin-bottom: 20px;
+ margin-top: 15px;
 }
-.drawer {
+button {
+ background-color: #333;
+ color: white;
+ padding: 10px 16px;
+ border: none;
+ border-radius: 6px;
+ font-size: 0.9rem;
+}
+.add-part {
  position: fixed;
- bottom: -260px;
- left: 0;
- right: 0;
- height: 260px;
- background: white;
- border-top-left-radius: 16px;
- border-top-right-radius: 16px;
- transition: bottom .3s;
+ right: 10px;
+ top: 10px;
+ background: #fff;
+ color: #333;
+ border: 1px solid #aaa;
+ border-radius: 6px;
+ padding: 5px 10px;
 }
-.drawer.open { bottom: 0; }
-.drawer-head {
+.modal {
+ position: fixed;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background-color: rgba(0, 0, 0, 0.6);
  display: flex;
- justify-content: space-between;
- padding: 8px 12px;
- border-bottom: 1px solid #eee;
+ align-items: center;
+ justify-content: center;
 }
-.grid2 {
+.modal.hidden {
+ display: none;
+}
+.modal-content {
+ background: white;
+ padding: 20px;
+ width: 90%;
+ max-width: 400px;
+ border-radius: 8px;
+ text-align: center;
+}
+.parts-grid {
  display: grid;
- grid-template-columns: repeat(2, 1fr);
- gap: 8px;
- padding: 10px;
- overflow-x: auto;
-}
-.grid2 img {
- width: 100%;
- border-radius: 10px;
- cursor: pointer;
+ grid-template-columns: 1fr 1fr;
+ gap: 10px;
 }
