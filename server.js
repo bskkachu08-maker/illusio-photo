@@ -4,14 +4,13 @@ import path from "path";
 import multer from "multer";
 const app = express();
 const PORT = process.env.PORT || 10000;
-// ==== 静的ファイルの設定 ====
+// ==== 静的ファイル ====
 app.use(express.static("newpublic"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// ==== 保存先の設定 ====
-const uploadDir = path.join("/tmp", "uploads"); // Renderで書き込み可能な領域
+// ==== Render書き込み対応領域 ====
+const uploadDir = path.join("/tmp", "uploads");
 const photosJsonPath = path.join("/tmp", "photos.json");
-// ==== フォルダ作成 ====
 if (!fs.existsSync(uploadDir)) {
  fs.mkdirSync(uploadDir, { recursive: true });
  console.log("✅ /tmp/uploads フォルダ作成済み");
@@ -22,7 +21,7 @@ const storage = multer.diskStorage({
  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
-// ==== 写真アップロードAPI ====
+// ==== アップロード ====
 app.post("/upload", upload.fields([{ name: "photoList" }, { name: "photoSingle" }]), (req, res) => {
  const password = req.body.password;
  if (password !== "Chipi0503") {
@@ -36,18 +35,17 @@ app.post("/upload", upload.fields([{ name: "photoList" }, { name: "photoSingle" 
  }
  try {
    let photos = [];
-   // 既存データを読み込み
    if (fs.existsSync(photosJsonPath)) {
      photos = JSON.parse(fs.readFileSync(photosJsonPath, "utf8"));
    }
-   // 新しいパーツを追加
    photos.push({
      color,
      listFile,
      singleFile,
+     listUrl: `/uploads/${listFile}`,
+     singleUrl: `/uploads/${singleFile}`,
      timestamp: new Date().toISOString(),
    });
-   // JSONに保存
    fs.writeFileSync(photosJsonPath, JSON.stringify(photos, null, 2));
    console.log(`✅ パーツアップロード成功: ${listFile}, ${singleFile} (${color})`);
    res.send("✅ パーツアップロード成功 (" + color + ")");
@@ -56,18 +54,12 @@ app.post("/upload", upload.fields([{ name: "photoList" }, { name: "photoSingle" 
    res.status(500).send("Server error: could not save photo");
  }
 });
-// ==== パーツ一覧取得API ====
+// ==== パーツ一覧 ====
 app.get("/photos", (req, res) => {
  try {
    if (fs.existsSync(photosJsonPath)) {
      const photos = JSON.parse(fs.readFileSync(photosJsonPath, "utf8"));
-     // 各ファイルのアクセスURLを付与（Renderで静的配信されるように）
-     const publicPhotos = photos.map(p => ({
-       ...p,
-       listUrl: `/uploads/${p.listFile}`,
-       singleUrl: `/uploads/${p.singleFile}`,
-     }));
-     res.json(publicPhotos);
+     res.json(photos);
    } else {
      res.json([]);
    }
@@ -76,10 +68,8 @@ app.get("/photos", (req, res) => {
    res.status(500).json([]);
  }
 });
-// ==== /tmp/uploads を静的配信可能にする ====
+// ==== アップロード画像の配信 ====
 app.use("/uploads", express.static(uploadDir));
-// ==== サーバー起動 ====
 app.listen(PORT, () => {
  console.log(`✨ +ILLuSio running at http://localhost:${PORT}`);
- console.log("Your Render service is live 🚀");
 });
