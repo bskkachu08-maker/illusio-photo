@@ -19,28 +19,76 @@
 </div>
 </main>
 <footer class="bottom-buttons">
-<button id="saveBtn">💎 このネックレスを保存</button>
+<button id="saveBtn">💎 保存</button>
 <button id="partsBtn">💠 パーツ一覧</button>
 </footer>
-<!-- パーツ一覧モーダル -->
+<!-- モーダル -->
 <div id="partsModal" class="modal hidden">
 <div class="modal-content">
 <span id="closeParts">&times;</span>
 <h2>パーツ一覧</h2>
-<div class="parts-grid" id="partsGrid"></div>
+<div id="partsGrid" class="parts-grid"></div>
 </div>
 </div>
 <script>
-   // --- パーツ一覧モーダル動作 ---
+   // パーツ追加ページへ
+   document.getElementById("addPartBtn").addEventListener("click", () => {
+     window.location.href = "admin.html";
+   });
+   // 一覧モーダル開閉
    const partsBtn = document.getElementById("partsBtn");
    const modal = document.getElementById("partsModal");
    const closeBtn = document.getElementById("closeParts");
-   partsBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+   const grid = document.getElementById("partsGrid");
+   partsBtn.addEventListener("click", async () => {
+     modal.classList.remove("hidden");
+     await loadParts();
+   });
    closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
-   // --- パーツ追加ボタン ---
-   const addBtn = document.getElementById("addPartBtn");
-   addBtn.addEventListener("click", () => {
-     window.location.href = "admin.html"; // 管理者アップロードページへ
+   // パーツ一覧読み込み
+   async function loadParts() {
+     grid.innerHTML = "読み込み中…";
+     try {
+       const res = await fetch("/photos");
+       const photos = await res.json();
+       if (!photos.length) {
+         grid.innerHTML = "<p>パーツがまだありません。</p>";
+         return;
+       }
+       grid.innerHTML = "";
+       photos.forEach(p => {
+         const div = document.createElement("div");
+         div.className = "part-item";
+         div.innerHTML = `
+<img src="${p.listUrl}" alt="${p.color}" width="80" height="80" draggable="true">
+<p>${p.color}</p>
+         `;
+         div.querySelector("img").addEventListener("dragstart", e => {
+           e.dataTransfer.setData("part", JSON.stringify(p));
+         });
+         grid.appendChild(div);
+       });
+     } catch (err) {
+       grid.innerHTML = `<p style="color:red;">一覧読み込み失敗: ${err.message}</p>`;
+     }
+   }
+   // ドラッグ＆ドロップで配置
+   const canvas = document.getElementById("necklaceCanvas");
+   canvas.addEventListener("dragover", e => e.preventDefault());
+   canvas.addEventListener("drop", e => {
+     e.preventDefault();
+     const data = JSON.parse(e.dataTransfer.getData("part"));
+     const svg = e.target.closest("svg");
+     const rect = svg.getBoundingClientRect();
+     const x = e.clientX - rect.left;
+     const y = e.clientY - rect.top;
+     const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+     img.setAttributeNS(null, "href", data.singleUrl);
+     img.setAttributeNS(null, "x", x - 15);
+     img.setAttributeNS(null, "y", y - 15);
+     img.setAttributeNS(null, "width", 30);
+     img.setAttributeNS(null, "height", 30);
+     svg.appendChild(img);
    });
 </script>
 </body>
