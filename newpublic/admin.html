@@ -5,83 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>+ILLuSio パーツ追加</title>
 <style>
-   body {
-     font-family: "Hiragino Sans", sans-serif;
-     text-align: center;
-     background: #f9f9f9;
-     padding: 40px;
-   }
-   form {
-     background: #fff;
-     padding: 25px;
-     border-radius: 10px;
-     display: inline-block;
-     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-   }
-   input, select, button {
-     margin-top: 8px;
-     padding: 6px 10px;
-   }
-   button {
-     background-color: #333;
-     color: white;
-     border: none;
-     border-radius: 6px;
-     cursor: pointer;
-   }
-   button:hover {
-     background-color: #555;
-   }
-   #result {
-     margin-top: 20px;
-     font-weight: bold;
-   }
+   body { font-family:"Hiragino Sans",sans-serif; text-align:center; background:#f9f9f9; padding:40px; }
+   form { background:#fff; padding:25px; border-radius:10px; display:inline-block; box-shadow:0 2px 10px rgba(0,0,0,.1); }
+   input,select,button{ margin-top:8px; padding:6px 10px; }
+   button{ background:#333; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+   button:hover{ background:#555; }
+   #result{ margin-top:16px; font-weight:bold; }
+   .actions{ margin-top:16px; display:flex; gap:8px; justify-content:center; }
+   .linkbtn{ background:#fff; color:#333; border:1px solid #aaa; }
 </style>
 </head>
 <body>
 <h1>+ILLuSio パーツ追加</h1>
 <form id="uploadForm" enctype="multipart/form-data">
-<label>管理パスワード:</label>
-<input type="password" name="password" required>
-<label>色カテゴリ:</label>
+<label>管理パスワード:</label><br>
+<input type="password" name="password" required><br>
+<label>色カテゴリ:</label><br>
 <select name="color" required>
-<option value="赤">赤</option>
-<option value="青">青</option>
-<option value="緑">緑</option>
-<option value="白">白</option>
-<option value="黒">黒</option>
-<option value="金">金</option>
-<option value="銀">銀</option>
-<option value="透明">透明</option>
-</select>
-<label>一覧用写真（複数ビーズ）:</label>
-<input type="file" name="photoList" accept="image/*" required>
-<label>配置用写真（1粒ビーズ）:</label>
-<input type="file" name="photoSingle" accept="image/*" required>
+<option value="赤">赤</option><option value="青">青</option>
+<option value="緑">緑</option><option value="白">白</option>
+<option value="黒">黒</option><option value="金">金</option>
+<option value="銀">銀</option><option value="透明">透明</option>
+</select><br>
+<label>一覧用写真（複数ビーズ）:</label><br>
+<input type="file" name="photoList" accept="image/*" required><br>
+<label>配置用写真（1粒ビーズ）:</label><br>
+<input type="file" name="photoSingle" accept="image/*" required><br>
 <button type="submit">アップロード</button>
 </form>
 <div id="result"></div>
+<div class="actions">
+<button class="linkbtn" id="backBtn">← デザインに戻る</button>
+<button class="linkbtn" id="anotherBtn">＋ 続けて追加</button>
+</div>
 <script>
    const form = document.getElementById("uploadForm");
    const result = document.getElementById("result");
-   form.addEventListener("submit", async (e) => {
+   const backBtn = document.getElementById("backBtn");
+   const anotherBtn = document.getElementById("anotherBtn");
+   backBtn.addEventListener("click", ()=> window.location.href = "index.html");
+   anotherBtn.addEventListener("click", ()=>{
+     form.reset();
+     result.textContent = "";
+   });
+   form.addEventListener("submit", async (e)=>{
      e.preventDefault();
      result.textContent = "⏳ アップロード中…";
-     const formData = new FormData(form);
-     try {
-       const res = await fetch("/upload", {
-         method: "POST",
-         body: formData,
-       });
+     const fd = new FormData(form);
+     try{
+       const res = await fetch("/upload", { method:"POST", body:fd });
        const text = await res.text();
-       if (res.ok) {
-         result.textContent = text;
+       if(res.ok){
+         result.textContent = "✅ " + text;
          result.style.color = "green";
-       } else {
+       }else{
          result.textContent = "❌ " + text;
          result.style.color = "red";
        }
-     } catch (err) {
+     }catch(err){
        result.textContent = "⚠️ 通信エラー: " + err.message;
        result.style.color = "red";
      }
