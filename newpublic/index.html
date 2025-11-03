@@ -1,68 +1,69 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>+ILLuSio</title>
 <style>
-   body {
-     font-family: "Hiragino Sans", sans-serif;
-     background: #f7f7f7;
-     margin: 0;
-     height: 100vh;
-     display: flex;
-     flex-direction: column;
-     justify-content: space-between;
-     text-align: center;
-   }
-   header { position: relative; padding-top: 10px; }
-   .logo { font-size: 2rem; margin: 0.5rem 0 0; font-weight: bold; }
-   .add-part {
-     position: absolute; right: 10px; top: 10px;
-     background: #fff; color: #333; border: 1px solid #aaa;
-     border-radius: 6px; padding: 5px 10px;
-   }
-   .main-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
-   .necklace-area { position: relative; }
-   .bottom-buttons { display: flex; justify-content: center; gap: 10px; padding: 15px 0; }
-   button { background: #333; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; }
-   button:hover { background: #555; }
-   /* パーツ一覧 */
-   .parts-panel {
-     position: fixed; left: 0; right: 0; bottom: -60%;
-     background: rgba(255,255,255,0.98);
-     border-top: 2px solid #ccc;
-     box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
-     border-radius: 16px 16px 0 0;
-     transition: bottom .35s ease-in-out;
-     padding: 20px; text-align: center;
-     max-height: 60%; overflow-y: auto; z-index: 10;
-   }
-   .parts-panel.open { bottom: 0; }
-   .parts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 10px; }
-   .parts-grid img { width: 100px; height: 100px; object-fit: contain; border: 1px solid #aaa; border-radius: 8px; cursor: grab; background: #fff; transition: transform .15s; }
-   .parts-grid img:active { transform: scale(.95); }
-   .close-panel { position: absolute; right: 20px; top: 10px; font-size: 24px; cursor: pointer; }
-   /* 固定編集バー */
-   .edit-bar {
-     position: fixed; right: 10px; bottom: 15px;
-     display: none; flex-direction: column; gap: 8px;
-     background: rgba(0,0,0,0.8); color: white;
-     padding: 10px; border-radius: 10px; z-index: 100;
-   }
-   .edit-bar.show { display: flex; }
-   .edit-bar button {
-     background: transparent; color: white;
-     border: 1px solid white; border-radius: 6px;
-     padding: 6px; font-size: 18px; cursor: pointer;
-   }
-   .move-grid {
-     display: grid;
-     grid-template-columns: 40px 40px 40px;
-     justify-content: center;
-     align-items: center;
-     margin-top: 6px;
-   }
+ :root{
+   --panel-bg: rgba(255,255,255,.98);
+   --wire:#bfbfbf;
+ }
+ body{
+   margin:0; font-family:"Hiragino Sans",sans-serif; background:#f7f7f7;
+   height:100vh; display:flex; flex-direction:column; justify-content:space-between; text-align:center;
+ }
+ header{ position:relative; padding:10px 0 0; }
+ .logo{ font-weight:700; font-size:2rem; margin:.5rem 0 0; }
+ .add-part{
+   position:absolute; right:10px; top:10px; background:#fff; color:#333;
+   border:1px solid #aaa; border-radius:8px; padding:6px 10px; cursor:pointer;
+ }
+ .main-area{ flex:1; display:flex; align-items:center; justify-content:center; }
+ .necklace-area{ position:relative; }
+ svg{ display:block; }
+ .bottom-buttons{ display:flex; gap:10px; justify-content:center; padding:14px 0; }
+ button{ background:#333; color:#fff; border:0; border-radius:8px; padding:10px 16px; cursor:pointer; }
+ button:hover{ background:#555; }
+ /* 下から出るパーツ一覧 */
+ .parts-panel{
+   position:fixed; left:0; right:0; bottom:-60%;
+   background:var(--panel-bg); border-top:2px solid #ccc; border-radius:16px 16px 0 0;
+   box-shadow:0 -2px 12px rgba(0,0,0,.15); transition:bottom .35s ease; padding:18px; z-index:10;
+   max-height:60%; overflow:auto; text-align:center;
+ }
+ .parts-panel.open{ bottom:0; }
+ .parts-grid{
+   display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); margin-top:10px;
+ }
+ .parts-grid img{
+   width:100px; height:100px; object-fit:contain; background:#fff; border:1px solid #aaa; border-radius:10px; cursor:grab;
+   transition:transform .15s;
+ }
+ .parts-grid img:active{ transform:scale(.95); }
+ .close-panel{ position:absolute; right:18px; top:10px; font-size:26px; cursor:pointer; }
+ /* ガラス風 操作バー（右下固定） */
+ .edit-bar{
+   position:fixed; right:20px; bottom:20px; display:none; flex-direction:column; gap:12px;
+   padding:16px; border-radius:16px; z-index:100;
+   background:rgba(255,255,255,.15); backdrop-filter:blur(10px);
+   border:1px solid rgba(255,255,255,.35); box-shadow:0 4px 16px rgba(0,0,0,.3);
+   animation:fadeIn .25s ease;
+ }
+ .edit-bar.show{ display:flex; }
+ @keyframes fadeIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+ .edit-row{ display:flex; gap:8px; justify-content:center; }
+ .edit-bar button{
+   width:44px; height:44px; border-radius:12px; background:rgba(255,255,255,.08);
+   border:1px solid rgba(255,255,255,.4); color:#fff; font-size:18px; font-weight:700; cursor:pointer;
+   transition:transform .15s, background .15s, box-shadow .15s;
+ }
+ .edit-bar button:hover{
+   background:rgba(255,255,255,.3); transform:scale(1.08); box-shadow:0 0 10px rgba(255,255,255,.45);
+ }
+ .move-grid{
+   display:grid; grid-template-columns:44px 44px 44px; gap:6px; justify-content:center; align-items:center;
+ }
 </style>
 </head>
 <body>
@@ -72,8 +73,9 @@
 </header>
 <main class="main-area">
 <div class="necklace-area" id="necklaceArea">
-<svg id="necklaceCanvas" width="320" height="320">
-<circle cx="160" cy="160" r="130" stroke="#bfbfbf" stroke-width="2" fill="none" />
+<svg id="canvas" width="340" height="340">
+<!-- ワイヤー（円） -->
+<circle id="wire" cx="170" cy="170" r="140" stroke="var(--wire)" stroke-width="2" fill="none"/>
 </svg>
 </div>
 </main>
@@ -87,133 +89,318 @@
 <h2>パーツ一覧</h2>
 <div id="partsGrid" class="parts-grid"></div>
 </div>
-<!-- 編集バー -->
+<!-- 操作バー -->
 <div id="editBar" class="edit-bar">
-<div style="display:flex; gap:6px; justify-content:center;">
-<button id="rotateL">↺</button>
-<button id="rotateR">↻</button>
+<div class="edit-row">
+<button id="rotateL" title="左回転">↺</button>
+<button id="rotateR" title="右回転">↻</button>
 </div>
-<div style="display:flex; gap:6px; justify-content:center;">
-<button id="bigger">＋</button>
-<button id="smaller">－</button>
+<div class="edit-row">
+<button id="bigger"  title="拡大">＋</button>
+<button id="smaller" title="縮小">－</button>
 </div>
 <div class="move-grid">
-<div></div><button id="moveUp">↑</button><div></div>
-<button id="moveLeft">←</button><div></div><button id="moveRight">→</button>
-<div></div><button id="moveDown">↓</button><div></div>
+<div></div><button id="moveUp"   title="上へ">↑</button><div></div>
+<button id="moveLeft" title="左へ">←</button><div></div><button id="moveRight" title="右へ">→</button>
+<div></div><button id="moveDown" title="下へ">↓</button><div></div>
 </div>
-<button id="delete">🗑</button>
+<button id="delete" title="削除">🗑</button>
 </div>
 <script>
-   const addPartBtn=document.getElementById("addPartBtn");
-   const svg=document.getElementById("necklaceCanvas");
-   const partsBtn=document.getElementById("partsBtn");
-   const panel=document.getElementById("partsPanel");
-   const closePanel=document.getElementById("closePanel");
-   const grid=document.getElementById("partsGrid");
-   const editBar=document.getElementById("editBar");
-   const btnBig=document.getElementById("bigger");
-   const btnSmall=document.getElementById("smaller");
-   const btnDel=document.getElementById("delete");
-   const btnRotL=document.getElementById("rotateL");
-   const btnRotR=document.getElementById("rotateR");
-   const moveUp=document.getElementById("moveUp");
-   const moveDown=document.getElementById("moveDown");
-   const moveLeft=document.getElementById("moveLeft");
-   const moveRight=document.getElementById("moveRight");
-   addPartBtn.addEventListener("click",()=>window.location.href="admin.html");
-   partsBtn.addEventListener("click",async()=>{panel.classList.add("open");await loadParts();});
-   closePanel.addEventListener("click",()=>panel.classList.remove("open"));
-   let selectedEl=null;
-   let rotation=0;
-   async function loadParts(){
-     grid.innerHTML="読み込み中…";
-     try{
-       const res=await fetch("/photos");
-       const photos=await res.json();
-       if(!photos.length){grid.innerHTML="<p>パーツがまだありません。</p>";return;}
-       grid.innerHTML="";
-       photos.forEach(p=>{
-         const img=document.createElement("img");
-         img.src=p.listUrl;
-         img.draggable=true;
-         img.addEventListener("dragstart",e=>e.dataTransfer.setData("part",JSON.stringify(p)));
-         grid.appendChild(img);
-       });
-     }catch(err){grid.innerHTML=`<p style="color:red;">読み込み失敗: ${err.message}</p>`;}
+ // === 基本参照 ===
+ const addPartBtn = document.getElementById("addPartBtn");
+ const partsBtn   = document.getElementById("partsBtn");
+ const partsPanel = document.getElementById("partsPanel");
+ const closePanel = document.getElementById("closePanel");
+ const partsGrid  = document.getElementById("partsGrid");
+ const editBar    = document.getElementById("editBar");
+ const svg        = document.getElementById("canvas");
+ const wire       = document.getElementById("wire");
+ // 操作ボタン
+ const btnRotL = document.getElementById("rotateL");
+ const btnRotR = document.getElementById("rotateR");
+ const btnBig  = document.getElementById("bigger");
+ const btnSmall= document.getElementById("smaller");
+ const btnUp   = document.getElementById("moveUp");
+ const btnDown = document.getElementById("moveDown");
+ const btnLeft = document.getElementById("moveLeft");
+ const btnRight= document.getElementById("moveRight");
+ const btnDel  = document.getElementById("delete");
+ // 画面設定
+ const CX = parseFloat(wire.getAttribute("cx")); // 170
+ const CY = parseFloat(wire.getAttribute("cy")); // 170
+ const R  = parseFloat(wire.getAttribute("r"));  // 140
+ // 状態管理
+ let beads = [];   // [{el, angle(rad)}]
+ let selected = null;
+ let rotationDeg = 0;
+ let lastActionAt = 0;
+ // 連打対策（デバウンス）
+ function canAct(interval=120){
+   const now = Date.now();
+   if(now - lastActionAt < interval) return false;
+   lastActionAt = now;
+   return true;
+ }
+ // 角度⇔座標
+ function posFromAngle(angle, w=35, h=35){
+   const cx = CX + R * Math.cos(angle);
+   const cy = CY + R * Math.sin(angle);
+   return { x: cx - w/2, y: cy - h/2 };
+ }
+ function centerOf(el){
+   const x = parseFloat(el.getAttribute("x"));
+   const y = parseFloat(el.getAttribute("y"));
+   const w = parseFloat(el.getAttribute("width"));
+   const h = parseFloat(el.getAttribute("height"));
+   return { cx: x + w/2, cy: y + h/2, w, h, x, y };
+ }
+ function angleAtPoint(x, y){
+   return Math.atan2(y - CY, x - CX);
+ }
+ function normalize(a){
+   while(a <= -Math.PI) a += 2*Math.PI;
+   while(a >   Math.PI) a -= 2*Math.PI;
+   return a;
+ }
+ // 選択 & 操作バー表示
+ function selectBead(el){
+   selected = beads.find(b => b.el === el) || null;
+   if(!selected){ editBar.classList.remove("show"); return; }
+   rotationDeg = parseFloat(el.dataset.rotate || "0");
+   editBar.classList.add("show");
+ }
+ svg.addEventListener("pointerdown", e=>{
+   if(e.target.tagName.toLowerCase() !== "image"){
+     selected = null;
+     editBar.classList.remove("show");
    }
-   // ドロップ（常にワイヤー上）
-   svg.addEventListener("dragover",e=>e.preventDefault());
-   svg.addEventListener("drop",e=>{
-     e.preventDefault();
-     const data=JSON.parse(e.dataTransfer.getData("part"));
-     const rect=svg.getBoundingClientRect();
-     const x=e.clientX-rect.left;
-     const y=e.clientY-rect.top;
-     const cx=160,cy=160,r=130;
-     const angle=Math.atan2(y-cy,x-cx);
-     const tx=cx+r*Math.cos(angle);
-     const ty=cy+r*Math.sin(angle);
-     const img=document.createElementNS("http://www.w3.org/2000/svg","image");
-     img.setAttributeNS(null,"href",data.singleUrl);
-     img.setAttributeNS(null,"x",tx-17);
-     img.setAttributeNS(null,"y",ty-17);
-     img.setAttributeNS(null,"width",35);
-     img.setAttributeNS(null,"height",35);
-     img.dataset.angle=angle;
-     svg.appendChild(img);
-     img.addEventListener("pointerdown",()=>selectBead(img));
-     selectBead(img);
+ });
+ // レイアウト: beads[] の angle に基づいて全て配置
+ function layoutAll(anchorIndex=null){
+   const n = beads.length;
+   if(n === 0) return;
+   if(n === 1){
+     const b = beads[0]; const el = b.el;
+     const w = parseFloat(el.getAttribute("width"))||35;
+     const h = parseFloat(el.getAttribute("height"))||35;
+     const p = posFromAngle(b.angle, w, h);
+     el.setAttribute("x", p.x); el.setAttribute("y", p.y);
+     // 回転の中心更新
+     const cx = p.x + w/2, cy = p.y + h/2;
+     const rot = parseFloat(el.dataset.rotate || "0");
+     el.setAttribute("transform", `rotate(${rot}, ${cx}, ${cy})`);
+     return;
+   }
+   // 等間隔整列（anchorIndexのビーズが現在の角度を保つ）
+   const baseIdx = (anchorIndex===null)? 0 : anchorIndex;
+   const baseAngle = beads[baseIdx].angle;
+   const step = 2*Math.PI / n;
+   for(let i=0;i<n;i++){
+     const idx = i;
+     const ang = normalize(baseAngle + (idx - baseIdx)*step);
+     beads[idx].angle = ang;
+     const el = beads[idx].el;
+     const w = parseFloat(el.getAttribute("width"))||35;
+     const h = parseFloat(el.getAttribute("height"))||35;
+     const p = posFromAngle(ang, w, h);
+     el.setAttribute("x", p.x); el.setAttribute("y", p.y);
+     // 回転中心は常に自身の中心
+     const cx = p.x + w/2, cy = p.y + h/2;
+     const rot = parseFloat(el.dataset.rotate || "0");
+     el.setAttribute("transform", `rotate(${rot}, ${cx}, ${cy})`);
+   }
+ }
+ // beads配列を角度順に回転させて挿入
+ function insertAtAngle(movedBead, targetAngle){
+   // 既存から一旦除外
+   beads = beads.filter(b => b !== movedBead);
+   // 角度で挿入位置を決定（最も近い位置の直後）
+   if(beads.length === 0){
+     movedBead.angle = normalize(targetAngle);
+     beads.push(movedBead);
+     layoutAll(0);
+     return;
+   }
+   // 角度昇順に並んでいるとみなして、挿入点を探す
+   let idx = 0;
+   let minDiff = Infinity;
+   beads.forEach((b, i)=>{
+     const diff = Math.abs(normalize(targetAngle - b.angle));
+     if(diff < minDiff){ minDiff = diff; idx = i; }
    });
-   function selectBead(el){
-     selectedEl=el;
-     rotation=parseFloat(el.dataset.rotate||"0");
-     editBar.classList.add("show");
-   }
-   svg.addEventListener("pointerdown",e=>{
-     if(e.target.tagName.toLowerCase()!=="image"){
-       selectedEl=null;
-       editBar.classList.remove("show");
+   // 近いものの「次」に挿入
+   const insertIndex = (idx + 1);
+   beads.splice(insertIndex, 0, movedBead);
+   movedBead.angle = normalize(targetAngle);
+   // アンカーは挿入した movedBead にして等間隔再配置
+   layoutAll(insertIndex);
+ }
+ // 画像追加（一覧からのドロップ）
+ function addBead(singleUrl, angle){
+   const el = document.createElementNS("http://www.w3.org/2000/svg","image");
+   el.setAttributeNS(null,"href", singleUrl);
+   el.setAttributeNS(null,"width", 35);
+   el.setAttributeNS(null,"height",35);
+   el.dataset.rotate = "0";
+   svg.appendChild(el);
+   const bead = { el, angle: normalize(angle) };
+   insertAtAngle(bead, angle);
+   // 選択＆ドラッグ移動（プレビュー→離したら再整列）
+   let dragging = false, offsetX=0, offsetY=0;
+   el.addEventListener("pointerdown", (e)=>{
+     selectBead(el);
+     dragging = true;
+     const rect = svg.getBoundingClientRect();
+     const c = centerOf(el);
+     offsetX = e.clientX - rect.left - c.x;
+     offsetY = e.clientY - rect.top  - c.y;
+     el.setPointerCapture(e.pointerId);
+   });
+   el.addEventListener("pointermove", (e)=>{
+     if(!dragging) return;
+     const rect = svg.getBoundingClientRect();
+     const x = e.clientX - rect.left - offsetX;
+     const y = e.clientY - rect.top  - offsetY;
+     el.setAttribute("x", x);
+     el.setAttribute("y", y);
+     // 回転中心も追随
+     const w = parseFloat(el.getAttribute("width"));
+     const h = parseFloat(el.getAttribute("height"));
+     const cx = x + w/2, cy = y + h/2;
+     const rot = parseFloat(el.dataset.rotate || "0");
+     el.setAttribute("transform", `rotate(${rot}, ${cx}, ${cy})`);
+   });
+   el.addEventListener("pointerup", (e)=>{
+     dragging = false;
+     el.releasePointerCapture(e.pointerId);
+     // 指を離した位置の角度にスナップして再整列
+     const c = centerOf(el);
+     const a = angleAtPoint(c.cx, c.cy);
+     insertAtAngle(bead, a);
+     selectBead(el);
+   });
+ }
+ // === 一覧の読み込み ===
+ async function loadParts(){
+   partsGrid.innerHTML = "読み込み中…";
+   try{
+     const res = await fetch("/photos");
+     const photos = await res.json();
+     if(!Array.isArray(photos) || photos.length===0){
+       partsGrid.innerHTML = "<p>パーツがまだありません。</p>"; return;
      }
-   });
-   // サイズ変更
-   btnBig.addEventListener("click",()=>{if(!selectedEl)return;resize(1.15);});
-   btnSmall.addEventListener("click",()=>{if(!selectedEl)return;resize(1/1.15);});
-   function resize(scale){
-     const w=parseFloat(selectedEl.getAttribute("width"));
-     const h=parseFloat(selectedEl.getAttribute("height"));
-     selectedEl.setAttribute("width",Math.min(Math.max(w*scale,16),140));
-     selectedEl.setAttribute("height",Math.min(Math.max(h*scale,16),140));
+     partsGrid.innerHTML = "";
+     photos.forEach(p=>{
+       const img = document.createElement("img");
+       img.src = p.listUrl;
+       img.alt = p.color || "";
+       img.draggable = true;
+       img.addEventListener("dragstart", e=>{
+         e.dataTransfer.setData("photo", JSON.stringify(p));
+       });
+       partsGrid.appendChild(img);
+     });
+   }catch(err){
+     partsGrid.innerHTML = `<p style="color:red;">読み込み失敗: ${err.message}</p>`;
    }
-   // 回転
-   btnRotL.addEventListener("click",()=>rotate(-15));
-   btnRotR.addEventListener("click",()=>rotate(15));
-   function rotate(d){
-     if(!selectedEl)return;
-     rotation+=d;
-     selectedEl.dataset.rotate=rotation;
-     selectedEl.setAttribute("transform",`rotate(${rotation},${parseFloat(selectedEl.getAttribute("x"))+17},${parseFloat(selectedEl.getAttribute("y"))+17})`);
+ }
+ // === ドロップで追加（吸着） ===
+ svg.addEventListener("dragover", e=>e.preventDefault());
+ svg.addEventListener("drop", e=>{
+   e.preventDefault();
+   const raw = e.dataTransfer.getData("photo");
+   if(!raw) return;
+   const p = JSON.parse(raw);
+   const rect = svg.getBoundingClientRect();
+   const x = e.clientX - rect.left;
+   const y = e.clientY - rect.top;
+   const angle = angleAtPoint(x, y);
+   addBead(p.singleUrl, angle);
+ });
+ // === UI ===
+ addPartBtn.addEventListener("click", ()=> location.href="admin.html");
+ partsBtn.addEventListener("click", async ()=>{ partsPanel.classList.add("open"); await loadParts(); });
+ closePanel.addEventListener("click", ()=> partsPanel.classList.remove("open"));
+ document.getElementById("saveBtn").addEventListener("click", ()=>{
+   alert("保存はスクリーンショットでお願いします（PNG書き出しは後で追加可能）");
+ });
+ // === 操作：回転（中心基準 15°） ===
+ function applyCenterRotate(el, deg){
+   el.dataset.rotate = String(deg);
+   const c = centerOf(el);
+   el.setAttribute("transform", `rotate(${deg}, ${c.cx}, ${c.cy})`);
+ }
+ btnRotL.addEventListener("click", ()=>{
+   if(!selected || !canAct()) return;
+   rotationDeg -= 15;
+   applyCenterRotate(selected.el, rotationDeg);
+ });
+ btnRotR.addEventListener("click", ()=>{
+   if(!selected || !canAct()) return;
+   rotationDeg += 15;
+   applyCenterRotate(selected.el, rotationDeg);
+ });
+ // === 操作：拡大縮小（強め・連打ガード） ===
+ function resizeSelected(scale){
+   const el = selected.el;
+   const w = parseFloat(el.getAttribute("width"));
+   const h = parseFloat(el.getAttribute("height"));
+   const nw = Math.min(Math.max(w*scale, 16), 220);
+   const nh = Math.min(Math.max(h*scale, 16), 220);
+   // 中心を保って拡大縮小
+   const c = centerOf(el);
+   el.setAttribute("x", c.cx - nw/2);
+   el.setAttribute("y", c.cy - nh/2);
+   el.setAttribute("width", nw);
+   el.setAttribute("height", nh);
+   // 回転中心も更新
+   applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
+ }
+ btnBig.addEventListener("click", ()=>{
+   if(!selected || !canAct()) return;
+   resizeSelected(1.5); // 1タップで約1.5倍
+ });
+ btnSmall.addEventListener("click", ()=>{
+   if(!selected || !canAct()) return;
+   resizeSelected(1/1.5); // 約0.67倍
+ });
+ // === 操作：移動（↑↓←→ ＝ 円周に沿って移動／ワイヤー外には出ない） ===
+ const stepDeg = 6; // 1押しで6°
+ function moveAlong(stepSign){
+   // stepSign: +1 (CW=時計回り=右/下), -1 (CCW=反時計回り=左/上)
+   const bead = selected;
+   if(!bead) return;
+   bead.angle = normalize(bead.angle + stepSign * stepDeg * Math.PI/180);
+   // 自分だけ移動（他は維持）
+   const el = bead.el;
+   const w = parseFloat(el.getAttribute("width"));
+   const h = parseFloat(el.getAttribute("height"));
+   const p = posFromAngle(bead.angle, w, h);
+   el.setAttribute("x", p.x);
+   el.setAttribute("y", p.y);
+   // 回転中心更新
+   applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
+ }
+ btnLeft .addEventListener("click", ()=>{ if(!selected || !canAct()) return; moveAlong(-1); });
+ btnUp   .addEventListener("click", ()=>{ if(!selected || !canAct()) return; moveAlong(-1); });
+ btnRight.addEventListener("click", ()=>{ if(!selected || !canAct()) return; moveAlong(+1); });
+ btnDown .addEventListener("click", ()=>{ if(!selected || !canAct()) return; moveAlong(+1); });
+ // === 削除 ===
+ btnDel.addEventListener("click", ()=>{
+   if(!selected) return;
+   selected.el.remove();
+   beads = beads.filter(b => b !== selected);
+   selected = null;
+   editBar.classList.remove("show");
+   layoutAll(0);
+ });
+ // クリックで選択（一覧後でも）
+ svg.addEventListener("click", e=>{
+   if(e.target.tagName.toLowerCase()==="image"){
+     selectBead(e.target);
    }
-   // 移動（上下左右）
-   moveUp.addEventListener("click",()=>move(0,-15));
-   moveDown.addEventListener("click",()=>move(0,15));
-   moveLeft.addEventListener("click",()=>move(-15,0));
-   moveRight.addEventListener("click",()=>move(15,0));
-   function move(dx,dy){
-     if(!selectedEl)return;
-     let x=parseFloat(selectedEl.getAttribute("x"))+dx;
-     let y=parseFloat(selectedEl.getAttribute("y"))+dy;
-     const cx=160,cy=160,r=130;
-     const angle=Math.atan2((y+17)-cy,(x+17)-cx);
-     const tx=cx+r*Math.cos(angle)-17;
-     const ty=cy+r*Math.sin(angle)-17;
-     selectedEl.setAttribute("x",tx);
-     selectedEl.setAttribute("y",ty);
-   }
-   // 削除
-   btnDel.addEventListener("click",()=>{if(selectedEl){selectedEl.remove();selectedEl=null;editBar.classList.remove("show");}});
-   // 保存
-   document.getElementById("saveBtn").addEventListener("click",()=>alert("スクリーンショットで保存してください（画像出力は次に追加可能）"));
+ });
 </script>
 </body>
 </html>
