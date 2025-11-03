@@ -4,9 +4,64 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>+ILLuSio</title>
-<link rel="stylesheet" href="style.css" />
 <style>
-   /* 下からスライドするパーツ棚 */
+   body {
+     font-family: "Hiragino Sans", sans-serif;
+     background: #f7f7f7;
+     margin: 0;
+     height: 100vh;
+     display: flex;
+     flex-direction: column;
+     justify-content: space-between;
+     text-align: center;
+   }
+   header {
+     position: relative;
+     padding-top: 10px;
+   }
+   .logo {
+     font-size: 2rem;
+     margin: 0.5rem 0 0;
+     font-weight: bold;
+   }
+   .add-part {
+     position: absolute;
+     right: 10px;
+     top: 10px;
+     background: #fff;
+     color: #333;
+     border: 1px solid #aaa;
+     border-radius: 6px;
+     padding: 5px 10px;
+   }
+   .main-area {
+     flex-grow: 1;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+   }
+   .necklace-area {
+     position: relative;
+   }
+   .bottom-buttons {
+     display: flex;
+     justify-content: center;
+     gap: 10px;
+     padding: 15px 0;
+   }
+   button {
+     background: #333;
+     color: white;
+     padding: 10px 16px;
+     border: none;
+     border-radius: 6px;
+     font-size: 0.9rem;
+     cursor: pointer;
+   }
+   button:hover {
+     background: #555;
+   }
+   /* パーツ一覧 */
    .parts-panel {
      position: fixed;
      left: 0; right: 0;
@@ -23,49 +78,56 @@
      z-index: 10;
    }
    .parts-panel.open { bottom: 0; }
-   .parts-grid{
-     display:grid;
-     grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));
-     gap:15px; margin-top:10px;
+   .parts-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+     gap: 15px;
+     margin-top: 10px;
    }
-   .parts-grid img{
-     width:100px; height:100px; object-fit:contain;
-     border:1px solid #aaa; border-radius:8px;
-     cursor:grab; background:#fff; transition:transform .15s;
+   .parts-grid img {
+     width: 100px;
+     height: 100px;
+     object-fit: contain;
+     border: 1px solid #aaa;
+     border-radius: 8px;
+     cursor: grab;
+     background: #fff;
+     transition: transform 0.15s;
    }
-   .parts-grid img:active{ transform:scale(.95); }
-   /* 編集バー */
-   .edit-bar{
-     position:absolute;
-     display:flex; gap:6px;
-     background: rgba(0,0,0,.7);
-     color:#fff; padding:6px 8px;
-     border-radius:8px; z-index:20;
-     pointer-events:auto;
+   .parts-grid img:active { transform: scale(0.95); }
+   .close-panel {
+     position: absolute;
+     right: 20px;
+     top: 10px;
+     font-size: 24px;
+     cursor: pointer;
    }
-   .edit-bar.hidden{ display:none; }
-   .edit-bar button{
-     background:transparent; color:#fff; border:1px solid #fff;
-     border-radius:6px; padding:4px 8px; font-size:14px;
+   /* 固定の編集バー */
+   .edit-bar {
+     position: fixed;
+     right: 10px;
+     bottom: 15px;
+     display: none;
+     flex-direction: column;
+     gap: 8px;
+     background: rgba(0,0,0,0.8);
+     color: white;
+     padding: 10px;
+     border-radius: 10px;
+     z-index: 100;
    }
-   /* レイアウト基本 */
-   body{
-     font-family:"Hiragino Sans",sans-serif;
-     background:#f7f7f7; text-align:center; margin:0;
-     height:100vh; display:flex; flex-direction:column; justify-content:space-between;
+   .edit-bar.show {
+     display: flex;
    }
-   header{ position:relative; padding-top:10px; }
-   .logo{ font-size:2rem; margin:.5rem 0 0; font-weight:bold; }
-   .add-part{
-     position:absolute; right:10px; top:10px;
-     background:#fff; color:#333; border:1px solid #aaa; border-radius:6px; padding:5px 10px;
+   .edit-bar button {
+     background: transparent;
+     color: white;
+     border: 1px solid white;
+     border-radius: 6px;
+     padding: 6px;
+     font-size: 18px;
+     cursor: pointer;
    }
-   .main-area{ flex-grow:1; display:flex; justify-content:center; align-items:center; }
-   .necklace-area{ position:relative; }
-   .bottom-buttons{ display:flex; justify-content:center; gap:10px; padding:15px 0; }
-   button{ background:#333; color:#fff; border:none; border-radius:6px; padding:10px 16px; font-size:.9rem; cursor:pointer; }
-   button:hover{ background:#555; }
-   .close-panel{ position:absolute; right:20px; top:10px; font-size:24px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -75,12 +137,6 @@
 </header>
 <main class="main-area">
 <div class="necklace-area" id="necklaceArea">
-<!-- 編集バー -->
-<div id="editBar" class="edit-bar hidden">
-<button id="bigger">＋ 大きく</button>
-<button id="smaller">－ 小さく</button>
-<button id="delete">削除</button>
-</div>
 <svg id="necklaceCanvas" width="320" height="320">
 <circle cx="160" cy="160" r="130" stroke="#bfbfbf" stroke-width="2" fill="none" />
 </svg>
@@ -90,60 +146,61 @@
 <button id="saveBtn">💎 保存</button>
 <button id="partsBtn">💠 パーツ一覧</button>
 </footer>
-<!-- 下から出るパーツ一覧 -->
+<!-- パーツ一覧 -->
 <div id="partsPanel" class="parts-panel">
 <span id="closePanel" class="close-panel">&times;</span>
 <h2>パーツ一覧</h2>
 <div id="partsGrid" class="parts-grid"></div>
 </div>
+<!-- 固定 編集バー -->
+<div id="editBar" class="edit-bar">
+<button id="rotateL">↺</button>
+<button id="rotateR">↻</button>
+<button id="bigger">＋</button>
+<button id="smaller">－</button>
+<button id="delete">🗑</button>
+</div>
 <script>
-   // ページ遷移
-   document.getElementById("addPartBtn").addEventListener("click", () => {
-     window.location.href = "admin.html";
-   });
-   // パーツ棚
+   const addPartBtn = document.getElementById("addPartBtn");
+   const svg = document.getElementById("necklaceCanvas");
    const partsBtn = document.getElementById("partsBtn");
    const panel = document.getElementById("partsPanel");
    const closePanel = document.getElementById("closePanel");
    const grid = document.getElementById("partsGrid");
-   partsBtn.addEventListener("click", async () => { panel.classList.add("open"); await loadParts(); });
-   closePanel.addEventListener("click", () => panel.classList.remove("open"));
-   // SVG & 編集バー
-   const svg = document.getElementById("necklaceCanvas");
    const editBar = document.getElementById("editBar");
-   const necklaceArea = document.getElementById("necklaceArea");
    const btnBig = document.getElementById("bigger");
    const btnSmall = document.getElementById("smaller");
    const btnDel = document.getElementById("delete");
+   const btnRotL = document.getElementById("rotateL");
+   const btnRotR = document.getElementById("rotateR");
+   addPartBtn.addEventListener("click", ()=> window.location.href="admin.html");
+   partsBtn.addEventListener("click", async ()=>{ panel.classList.add("open"); await loadParts(); });
+   closePanel.addEventListener("click", ()=> panel.classList.remove("open"));
    let selectedEl = null;
-   let dragging = false;
-   let dragOffset = { x: 0, y: 0 };
-   // パーツ一覧を読み込み
-   async function loadParts(){
+   let rotation = 0;
+   // パーツ一覧
+   async function loadParts() {
      grid.innerHTML = "読み込み中…";
-     try{
+     try {
        const res = await fetch("/photos");
        const photos = await res.json();
-       if(!photos.length){ grid.innerHTML = "<p>パーツがまだありません。</p>"; return; }
+       if (!photos.length) {
+         grid.innerHTML = "<p>パーツがまだありません。</p>";
+         return;
+       }
        grid.innerHTML = "";
-       photos.forEach(p=>{
+       photos.forEach(p => {
          const img = document.createElement("img");
          img.src = p.listUrl;
-         img.alt = p.color;
          img.draggable = true;
-         // ドラッグ開始
-         img.addEventListener("dragstart", e=>{
-           e.dataTransfer.setData("part", JSON.stringify(p));
-         });
+         img.addEventListener("dragstart", e => e.dataTransfer.setData("part", JSON.stringify(p)));
          grid.appendChild(img);
        });
-     }catch(err){
+     } catch (err) {
        grid.innerHTML = `<p style="color:red;">読み込み失敗: ${err.message}</p>`;
      }
    }
-   // ===========================
-   // ドロップ → 吸い込み配置
-   // ===========================
+   // ドロップ（ワイヤー上スナップ）
    svg.addEventListener("dragover", e => e.preventDefault());
    svg.addEventListener("drop", e => {
      e.preventDefault();
@@ -155,113 +212,64 @@
      const angle = Math.atan2(y - cy, x - cx);
      const targetX = cx + r * Math.cos(angle);
      const targetY = cy + r * Math.sin(angle);
-     const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-     img.setAttributeNS(null, "href", data.singleUrl);
-     img.setAttributeNS(null, "x", x - 17);
-     img.setAttributeNS(null, "y", y - 17);
-     img.setAttributeNS(null, "width", 35);
-     img.setAttributeNS(null, "height", 35);
+     const img = document.createElementNS("http://www.w3.org/2000/svg","image");
+     img.setAttributeNS(null,"href",data.singleUrl);
+     img.setAttributeNS(null,"x",targetX - 17);
+     img.setAttributeNS(null,"y",targetY - 17);
+     img.setAttributeNS(null,"width",35);
+     img.setAttributeNS(null,"height",35);
+     img.dataset.angle = angle;
      svg.appendChild(img);
-     // スッと吸い付くアニメーション
-     img.animate(
-       [
-         { x: x - 17, y: y - 17 },
-         { x: targetX - 17, y: targetY - 17 }
-       ],
-       { duration: 350, easing: "ease-out" }
-     ).onfinish = () => {
-       img.setAttribute("x", targetX - 17);
-       img.setAttribute("y", targetY - 17);
-     };
-     enableSelectableDraggable(img);
+     img.addEventListener("pointerdown",()=>selectBead(img));
      selectBead(img);
    });
-   // ===========================
-   // ドラッグ＆編集可能なビーズ設定
-   // ===========================
-   function enableSelectableDraggable(el){
-     el.addEventListener("pointerdown", e=>{
-       e.preventDefault();
-       selectBead(el);
-       const x = parseFloat(el.getAttribute("x")) || 0;
-       const y = parseFloat(el.getAttribute("y")) || 0;
-       const rect = svg.getBoundingClientRect();
-       const px = e.clientX - rect.left;
-       const py = e.clientY - rect.top;
-       dragOffset.x = px - x;
-       dragOffset.y = py - y;
-       dragging = true;
-       el.setPointerCapture(e.pointerId);
-     });
-     el.addEventListener("pointermove", e=>{
-       if(!dragging) return;
-       const rect = svg.getBoundingClientRect();
-       const px = e.clientX - rect.left;
-       const py = e.clientY - rect.top;
-       const nx = px - dragOffset.x;
-       const ny = py - dragOffset.y;
-       el.setAttribute("x", nx);
-       el.setAttribute("y", ny);
-       showEditBarNear(el);
-     });
-     el.addEventListener("pointerup", e=>{
-       dragging = false;
-       el.releasePointerCapture(e.pointerId);
-     });
-     svg.addEventListener("pointerdown", e=>{
-       if(e.target.tagName.toLowerCase() !== "image"){
-         selectedEl = null;
-         hideEditBar();
-       }
-     });
+   // 選択
+   function selectBead(el){
+     selectedEl = el;
+     rotation = parseFloat(el.dataset.rotate || "0");
+     editBar.classList.add("show");
    }
-   function showEditBarNear(el){
-     const bb = el.getBoundingClientRect();
-     const pa = necklaceArea.getBoundingClientRect();
-     editBar.style.left = (bb.left - pa.left + bb.width/2 - editBar.offsetWidth/2) + "px";
-     editBar.style.top  = (bb.top - pa.top - editBar.offsetHeight - 8) + "px";
-     editBar.classList.remove("hidden");
-   }
-   function hideEditBar(){ editBar.classList.add("hidden"); }
-   function selectBead(el){ selectedEl = el; showEditBarNear(el); }
-   // サイズ変更・削除
+   svg.addEventListener("pointerdown", e=>{
+     if(e.target.tagName.toLowerCase()!=="image"){
+       selectedEl=null;
+       editBar.classList.remove("show");
+     }
+   });
+   // 大きさ変更
    btnBig.addEventListener("click", ()=>{
-     if(!selectedEl) return;
-     const w = parseFloat(selectedEl.getAttribute("width"));
-     const h = parseFloat(selectedEl.getAttribute("height"));
-     const x = parseFloat(selectedEl.getAttribute("x"));
-     const y = parseFloat(selectedEl.getAttribute("y"));
-     const nw = Math.min(w * 1.15, 140);
-     const nh = Math.min(h * 1.15, 140);
-     selectedEl.setAttribute("x", x - (nw - w)/2);
-     selectedEl.setAttribute("y", y - (nh - h)/2);
-     selectedEl.setAttribute("width", nw);
-     selectedEl.setAttribute("height", nh);
-     showEditBarNear(selectedEl);
+     if(!selectedEl)return;
+     const w=parseFloat(selectedEl.getAttribute("width"));
+     const h=parseFloat(selectedEl.getAttribute("height"));
+     selectedEl.setAttribute("width",Math.min(w*1.15,140));
+     selectedEl.setAttribute("height",Math.min(h*1.15,140));
    });
    btnSmall.addEventListener("click", ()=>{
-     if(!selectedEl) return;
-     const w = parseFloat(selectedEl.getAttribute("width"));
-     const h = parseFloat(selectedEl.getAttribute("height"));
-     const x = parseFloat(selectedEl.getAttribute("x"));
-     const y = parseFloat(selectedEl.getAttribute("y"));
-     const nw = Math.max(w / 1.15, 16);
-     const nh = Math.max(h / 1.15, 16);
-     selectedEl.setAttribute("x", x - (nw - w)/2);
-     selectedEl.setAttribute("y", y - (nh - h)/2);
-     selectedEl.setAttribute("width", nw);
-     selectedEl.setAttribute("height", nh);
-     showEditBarNear(selectedEl);
+     if(!selectedEl)return;
+     const w=parseFloat(selectedEl.getAttribute("width"));
+     const h=parseFloat(selectedEl.getAttribute("height"));
+     selectedEl.setAttribute("width",Math.max(w/1.15,16));
+     selectedEl.setAttribute("height",Math.max(h/1.15,16));
    });
+   // 回転
+   btnRotL.addEventListener("click", ()=>{
+     if(!selectedEl)return;
+     rotation -= 15;
+     selectedEl.dataset.rotate = rotation;
+     selectedEl.setAttribute("transform",`rotate(${rotation},${parseFloat(selectedEl.getAttribute("x"))+17},${parseFloat(selectedEl.getAttribute("y"))+17})`);
+   });
+   btnRotR.addEventListener("click", ()=>{
+     if(!selectedEl)return;
+     rotation += 15;
+     selectedEl.dataset.rotate = rotation;
+     selectedEl.setAttribute("transform",`rotate(${rotation},${parseFloat(selectedEl.getAttribute("x"))+17},${parseFloat(selectedEl.getAttribute("y"))+17})`);
+   });
+   // 削除
    btnDel.addEventListener("click", ()=>{
-     if(!selectedEl) return;
-     selectedEl.remove();
-     selectedEl = null;
-     hideEditBar();
+     if(selectedEl){ selectedEl.remove(); selectedEl=null; editBar.classList.remove("show"); }
    });
-   // 保存ボタン
+   // 保存
    document.getElementById("saveBtn").addEventListener("click", ()=>{
-     alert("保存は端末のスクリーンショットでお願いします（画像出力も後で追加可）");
+     alert("スクリーンショットで保存してください（自動保存も後で追加可）");
    });
 </script>
 </body>
