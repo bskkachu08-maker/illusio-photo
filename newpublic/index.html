@@ -5,6 +5,109 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>+ILLuSio</title>
 <link rel="stylesheet" href="style.css" />
+<style>
+   /* ↓ ここでパーツ一覧のデザインを変更 ↓ */
+   .parts-panel {
+     position: fixed;
+     left: 0;
+     right: 0;
+     bottom: -60%;
+     background: rgba(255, 255, 255, 0.98);
+     border-top: 2px solid #ccc;
+     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+     border-radius: 16px 16px 0 0;
+     transition: bottom 0.35s ease-in-out;
+     padding: 20px;
+     text-align: center;
+     max-height: 60%;
+     overflow-y: auto;
+     z-index: 10;
+   }
+   .parts-panel.open {
+     bottom: 0;
+   }
+   .parts-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+     gap: 15px;
+     margin-top: 10px;
+   }
+   .parts-grid img {
+     width: 100px;
+     height: 100px;
+     object-fit: contain;
+     border-radius: 8px;
+     border: 1px solid #aaa;
+     cursor: grab;
+     background: #fff;
+     transition: transform 0.15s;
+   }
+   .parts-grid img:active {
+     cursor: grabbing;
+     transform: scale(0.95);
+   }
+   .close-panel {
+     position: absolute;
+     right: 20px;
+     top: 10px;
+     font-size: 24px;
+     cursor: pointer;
+   }
+   /* そのほか既存デザインも軽く調整 */
+   body {
+     font-family: "Hiragino Sans", sans-serif;
+     background-color: #f7f7f7;
+     text-align: center;
+     margin: 0;
+     height: 100vh;
+     display: flex;
+     flex-direction: column;
+     justify-content: space-between;
+   }
+   header {
+     position: relative;
+     padding-top: 10px;
+   }
+   .logo {
+     font-size: 2rem;
+     margin: 0.5rem 0 0;
+     font-weight: bold;
+   }
+   .add-part {
+     position: absolute;
+     right: 10px;
+     top: 10px;
+     background: #fff;
+     color: #333;
+     border: 1px solid #aaa;
+     border-radius: 6px;
+     padding: 5px 10px;
+   }
+   .main-area {
+     flex-grow: 1;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+   }
+   .bottom-buttons {
+     display: flex;
+     justify-content: center;
+     gap: 10px;
+     padding: 15px 0;
+   }
+   button {
+     background-color: #333;
+     color: white;
+     padding: 10px 16px;
+     border: none;
+     border-radius: 6px;
+     font-size: 0.9rem;
+     cursor: pointer;
+   }
+   button:hover {
+     background-color: #555;
+   }
+</style>
 </head>
 <body>
 <header>
@@ -22,29 +125,29 @@
 <button id="saveBtn">💎 保存</button>
 <button id="partsBtn">💠 パーツ一覧</button>
 </footer>
-<!-- モーダル -->
-<div id="partsModal" class="modal hidden">
-<div class="modal-content">
-<span id="closeParts">&times;</span>
+<!-- 下から出てくるパーツ一覧 -->
+<div id="partsPanel" class="parts-panel">
+<span id="closePanel" class="close-panel">&times;</span>
 <h2>パーツ一覧</h2>
 <div id="partsGrid" class="parts-grid"></div>
 </div>
-</div>
 <script>
-   // パーツ追加ページへ
+   // ページ遷移
    document.getElementById("addPartBtn").addEventListener("click", () => {
      window.location.href = "admin.html";
    });
-   // 一覧モーダル開閉
+   // パネル開閉
    const partsBtn = document.getElementById("partsBtn");
-   const modal = document.getElementById("partsModal");
-   const closeBtn = document.getElementById("closeParts");
+   const panel = document.getElementById("partsPanel");
+   const closePanel = document.getElementById("closePanel");
    const grid = document.getElementById("partsGrid");
    partsBtn.addEventListener("click", async () => {
-     modal.classList.remove("hidden");
+     panel.classList.add("open");
      await loadParts();
    });
-   closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+   closePanel.addEventListener("click", () => {
+     panel.classList.remove("open");
+   });
    // パーツ一覧読み込み
    async function loadParts() {
      grid.innerHTML = "読み込み中…";
@@ -57,22 +160,21 @@
        }
        grid.innerHTML = "";
        photos.forEach(p => {
-         const div = document.createElement("div");
-         div.className = "part-item";
-         div.innerHTML = `
-<img src="${p.listUrl}" alt="${p.color}" width="80" height="80" draggable="true">
-<p>${p.color}</p>
-         `;
-         div.querySelector("img").addEventListener("dragstart", e => {
+         const img = document.createElement("img");
+         img.src = p.listUrl;
+         img.alt = p.color;
+         img.draggable = true;
+         // 🎯 ドラッグ開始時にデータを保持
+         img.addEventListener("dragstart", e => {
            e.dataTransfer.setData("part", JSON.stringify(p));
          });
-         grid.appendChild(div);
+         grid.appendChild(img);
        });
      } catch (err) {
-       grid.innerHTML = `<p style="color:red;">一覧読み込み失敗: ${err.message}</p>`;
+       grid.innerHTML = `<p style="color:red;">読み込み失敗: ${err.message}</p>`;
      }
    }
-   // ドラッグ＆ドロップで配置
+   // 🎯 ネックレスにドロップ配置
    const canvas = document.getElementById("necklaceCanvas");
    canvas.addEventListener("dragover", e => e.preventDefault());
    canvas.addEventListener("drop", e => {
@@ -86,8 +188,8 @@
      img.setAttributeNS(null, "href", data.singleUrl);
      img.setAttributeNS(null, "x", x - 15);
      img.setAttributeNS(null, "y", y - 15);
-     img.setAttributeNS(null, "width", 30);
-     img.setAttributeNS(null, "height", 30);
+     img.setAttributeNS(null, "width", 35);
+     img.setAttributeNS(null, "height", 35);
      svg.appendChild(img);
    });
 </script>
