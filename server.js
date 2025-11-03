@@ -27,7 +27,7 @@ const upload = multer({ storage });
 // ==== 2枚同時アップロード ====
 app.post("/upload", upload.fields([{ name: "photoList" }, { name: "photoSingle" }]), (req, res) => {
  const password = req.body.password;
- if (password !== "Chipi053") {
+ if (password !== "Chipi0503") {
    return res.status(403).send("Forbidden: incorrect password");
  }
  const color = req.body.color;
