@@ -7,17 +7,21 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<header>
 <h1 class="logo">+ILLuSio</h1>
+<button id="addPartBtn" class="add-part">＋パーツ追加</button>
+</header>
+<main class="main-area">
 <div class="necklace-area">
 <svg id="necklaceCanvas" width="320" height="320">
-<circle cx="160" cy="160" r="130" stroke="#ccc" stroke-width="2" fill="none" />
+<circle cx="160" cy="160" r="130" stroke="#bfbfbf" stroke-width="2" fill="none" />
 </svg>
 </div>
-<div class="bottom-buttons">
+</main>
+<footer class="bottom-buttons">
 <button id="saveBtn">💎 このネックレスを保存</button>
 <button id="partsBtn">💠 パーツ一覧</button>
-</div>
-<button id="addPartBtn" class="add-part">＋パーツ追加</button>
+</footer>
 <!-- パーツ一覧モーダル -->
 <div id="partsModal" class="modal hidden">
 <div class="modal-content">
@@ -36,7 +40,7 @@
    // --- パーツ追加ボタン ---
    const addBtn = document.getElementById("addPartBtn");
    addBtn.addEventListener("click", () => {
-     window.location.href = "admin.html"; // パスワード付きアップロード画面へ移動
+     window.location.href = "admin.html"; // 管理者アップロードページへ
    });
 </script>
 </body>
