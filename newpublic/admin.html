@@ -3,112 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>+ILLuSio パーツ追加ページ</title>
-<style>
-   body {
-     font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-     background-color: #fafafa;
-     text-align: center;
-     padding: 40px 10px;
-   }
-   h1 {
-     font-size: 28px;
-     margin-bottom: 20px;
-   }
-   form {
-     display: inline-block;
-     background: white;
-     padding: 25px 35px;
-     border-radius: 10px;
-     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-   }
-   label {
-     display: block;
-     margin-top: 12px;
-     font-weight: 600;
-   }
-   input, select, button {
-     margin-top: 6px;
-     font-size: 15px;
-     padding: 6px 10px;
-   }
-   button {
-     background-color: #222;
-     color: white;
-     border: none;
-     border-radius: 6px;
-     padding: 10px 20px;
-     margin-top: 18px;
-     cursor: pointer;
-   }
-   button:hover {
-     background-color: #444;
-   }
-   #result {
-     margin-top: 20px;
-     font-size: 16px;
-     font-weight: bold;
-   }
-   a {
-     display: block;
-     margin-top: 20px;
-     color: #444;
-     text-decoration: none;
-   }
-   a:hover {
-     text-decoration: underline;
-   }
-</style>
+<title>+ILLuSio</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>+ILLuSio パーツ追加ページ</h1>
-<form id="uploadForm" enctype="multipart/form-data">
-<label>管理者パスワード:</label>
-<input type="password" name="password" required>
-<label>色カテゴリ:</label>
-<select name="color" required>
-<option value="赤">赤</option>
-<option value="青">青</option>
-<option value="黄">黄</option>
-<option value="緑">緑</option>
-<option value="白">白</option>
-<option value="黒">黒</option>
-</select>
-<label>一覧用の写真（複数ビーズ）:</label>
-<input type="file" name="photoList" accept="image/*" required>
-<label>配置用の写真（1粒ビーズ）:</label>
-<input type="file" name="photoSingle" accept="image/*" required>
-<button type="submit">アップロード</button>
-</form>
-<div id="result"></div>
-<a href="index.html">← デザイン画面へ戻る</a>
+<header>
+<h1 class="logo">+ILLuSio</h1>
+<button id="addPartBtn" class="add-part">＋パーツ追加</button>
+</header>
+<main class="main-area">
+<div class="necklace-area">
+<svg id="necklaceCanvas" width="320" height="320">
+<circle cx="160" cy="160" r="130" stroke="#bfbfbf" stroke-width="2" fill="none" />
+</svg>
+</div>
+</main>
+<footer class="bottom-buttons">
+<button id="saveBtn">💎 このネックレスを保存</button>
+<button id="partsBtn">💠 パーツ一覧</button>
+</footer>
+<!-- パーツ一覧モーダル -->
+<div id="partsModal" class="modal hidden">
+<div class="modal-content">
+<span id="closeParts">&times;</span>
+<h2>パーツ一覧</h2>
+<div class="parts-grid" id="partsGrid"></div>
+</div>
+</div>
 <script>
-   const form = document.getElementById("uploadForm");
-   const result = document.getElementById("result");
-   form.addEventListener("submit", async (e) => {
-     e.preventDefault();
-     result.textContent = "⏳ アップロード中…";
-     const formData = new FormData(form);
+   const partsBtn = document.getElementById("partsBtn");
+   const modal = document.getElementById("partsModal");
+   const closeBtn = document.getElementById("closeParts");
+   const grid = document.getElementById("partsGrid");
+   // モーダル表示切替
+   partsBtn.addEventListener("click", async () => {
+     modal.classList.remove("hidden");
+     await loadParts();
+   });
+   closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+   // パーツ追加ボタン
+   document.getElementById("addPartBtn").addEventListener("click", () => {
+     window.location.href = "admin.html";
+   });
+   // ✅ パーツ一覧を読み込む
+   async function loadParts() {
+     grid.innerHTML = "読み込み中…";
      try {
-       const response = await fetch("/upload", {
-         method: "POST",
-         body: formData,
-       });
-       const text = await response.text();
-       if (response.ok) {
-         result.innerHTML = "✅ " + text;
-         result.style.color = "green";
-       } else {
-         result.innerHTML = "❌ アップロード失敗<br>" + text;
-         result.style.color = "red";
+       const res = await fetch("/photos");
+       const photos = await res.json();
+       if (!photos.length) {
+         grid.innerHTML = "<p>パーツがまだありません。</p>";
+         return;
        }
+       // 2列グリッド生成
+       grid.innerHTML = "";
+       photos.forEach(p => {
+         const div = document.createElement("div");
+         div.className = "part-item";
+         div.innerHTML = `
+<img src="${p.listUrl}" alt="${p.color}" width="80" height="80" draggable="true">
+<p>${p.color}</p>
+         `;
+         // ドラッグイベント（ネックレスエリアに追加）
+         div.querySelector("img").addEventListener("dragstart", e => {
+           e.dataTransfer.setData("part", JSON.stringify(p));
+         });
+         grid.appendChild(div);
+       });
      } catch (err) {
-       console.error(err);
-       result.innerHTML = "⚠️ 通信エラー: " + err.message;
-       result.style.color = "red";
+       grid.innerHTML = `<p style="color:red;">一覧の読み込みに失敗しました: ${err.message}</p>`;
      }
+   }
+   // ✅ ドロップして配置
+   const canvas = document.getElementById("necklaceCanvas");
+   canvas.addEventListener("dragover", e => e.preventDefault());
+   canvas.addEventListener("drop", e => {
+     e.preventDefault();
+     const data = JSON.parse(e.dataTransfer.getData("part"));
+     const svg = e.target.closest("svg");
+     const rect = svg.getBoundingClientRect();
+     const x = e.clientX - rect.left;
+     const y = e.clientY - rect.top;
+     const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+     img.setAttributeNS(null, "href", data.singleUrl);
+     img.setAttributeNS(null, "x", x - 15);
+     img.setAttributeNS(null, "y", y - 15);
+     img.setAttributeNS(null, "width", 30);
+     img.setAttributeNS(null, "height", 30);
+     svg.appendChild(img);
    });
 </script>
 </body>
-</html>
 </html>
