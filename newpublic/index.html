@@ -5,69 +5,42 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>+ILLuSio</title>
 <style>
- :root{
-   --wire:#bfbfbf;
-   --panel-bg:#fff;
- }
  body{
-   margin:0; font-family:"Hiragino Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-   background:#f7f7f7; color:#111; height:100vh; display:flex; flex-direction:column; text-align:center;
+   margin:0; background:#f7f7f7; font-family:"Hiragino Sans",sans-serif; text-align:center;
  }
- header{ position:relative; padding:10px 0 0; }
- .logo{ font-weight:700; font-size:2rem; margin:.5rem 0 0; }
+ header{position:relative; padding:10px 0;}
+ .logo{font-size:2rem; font-weight:700;}
  .add-part{
    position:absolute; right:10px; top:10px; background:#111; color:#fff;
    border:0; border-radius:10px; padding:8px 12px; cursor:pointer; font-weight:600;
  }
- .add-part:hover{ opacity:.9; }
- .main-area{ flex:1; display:flex; align-items:center; justify-content:center; }
- .necklace-area{ position:relative; }
- svg{ display:block; }
- .bottom-buttons{ display:flex; gap:10px; justify-content:center; padding:12px 0 16px; }
- .btn{ background:#111; color:#fff; border:0; border-radius:10px; padding:10px 14px; cursor:pointer; }
- .btn:hover{ opacity:.9; }
- /* パーツ一覧（下からスライド） */
+ .main-area{display:flex; justify-content:center; align-items:center; height:70vh;}
+ svg{display:block;}
+ footer{padding:10px;}
+ .btn{background:#111; color:#fff; border:0; border-radius:10px; padding:10px 16px; cursor:pointer;}
  .parts-panel{
    position:fixed; left:0; right:0; bottom:-65%;
-   background:var(--panel-bg); border-top:2px solid #e6e6e6; border-radius:16px 16px 0 0;
-   box-shadow:0 -8px 24px rgba(0,0,0,.12); transition:bottom .35s ease; padding:14px 14px 24px; z-index:10;
-   max-height:65%; overflow:auto; text-align:left;
+   background:#fff; border-top:2px solid #ddd; border-radius:16px 16px 0 0;
+   transition:bottom .3s ease; padding:10px; box-shadow:0 -5px 15px rgba(0,0,0,.2);
+   max-height:65%; overflow:auto;
  }
- .parts-panel.open{ bottom:0; }
- .panel-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
- .close-panel{ font-size:26px; cursor:pointer; padding:6px 10px; }
- .color-tabs{ display:flex; gap:8px; flex-wrap:wrap; padding:8px 0 6px; }
- .tab{
-   border:1px solid #ddd; background:#fff; color:#111; padding:6px 10px; border-radius:999px;
-   font-size:.9rem; cursor:pointer;
- }
- .tab.active{ background:#111; color:#fff; border-color:#111; }
- .group-title{ margin:10px 2px 6px; font-weight:700; }
- .parts-grid{
-   display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:14px;
- }
- .part-img{
-   width:100%; aspect-ratio:1/1; object-fit:contain; background:#fff; border:1px solid #ddd; border-radius:10px;
-   cursor:grab;
- }
- /* 操作バー（黒基調・右下固定） */
+ .parts-panel.open{bottom:0;}
+ .color-tabs{display:flex; gap:8px; flex-wrap:wrap; margin:10px;}
+ .tab{border:1px solid #aaa; background:#fff; border-radius:999px; padding:5px 10px; cursor:pointer;}
+ .tab.active{background:#111; color:#fff;}
+ .parts-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:10px;}
+ .part-img{width:100%; aspect-ratio:1/1; object-fit:contain; border:1px solid #ccc; border-radius:10px; cursor:grab;}
  .edit-bar{
-   position:fixed; right:16px; bottom:16px; display:none; flex-direction:column; gap:10px;
-   background:#111; color:#fff; padding:14px; border-radius:16px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,.35);
+   position:fixed; right:16px; bottom:16px; background:#111; color:#fff;
+   padding:14px; border-radius:16px; display:none; flex-direction:column; gap:10px;
  }
- .edit-bar.show{ display:flex; }
- .edit-row{ display:flex; gap:8px; justify-content:center; }
+ .edit-bar.show{display:flex;}
+ .edit-row{display:flex; gap:8px; justify-content:center;}
  .ctrl{
-   width:46px; height:46px; border-radius:12px; border:1px solid rgba(255,255,255,.22);
+   width:46px; height:46px; border-radius:12px; border:1px solid rgba(255,255,255,.2);
    background:#111; color:#fff; font-size:18px; font-weight:700; cursor:pointer;
-   transition:transform .12s ease, background .12s ease;
  }
- .ctrl:hover{ background:#222; transform:scale(1.06); }
- /* 小さめ端末でネックレスを少し小さく */
- @media (max-width:420px){
-   #canvas{ width:300px; height:300px; }
-   #wire{ cx:150px; cy:150px; r:125px; }
- }
+ .ctrl:hover{background:#222;}
 </style>
 </head>
 <body>
@@ -76,344 +49,110 @@
 <button id="addPartBtn" class="add-part">＋パーツ追加</button>
 </header>
 <main class="main-area">
-<div class="necklace-area" id="necklaceArea">
 <svg id="canvas" width="340" height="340">
-<circle id="wire" cx="170" cy="170" r="140" stroke="var(--wire)" stroke-width="2" fill="none"/>
+<circle id="wire" cx="170" cy="170" r="140" stroke="#aaa" stroke-width="2" fill="none"/>
 </svg>
-</div>
 </main>
-<footer class="bottom-buttons">
-<button id="saveBtn"  class="btn">💎 保存</button>
+<footer>
+<button id="saveBtn" class="btn">💎 保存</button>
 <button id="partsBtn" class="btn">💠 パーツ一覧</button>
 </footer>
-<!-- パーツ一覧パネル -->
 <div id="partsPanel" class="parts-panel">
-<div class="panel-header">
-<strong>パーツ一覧</strong>
-<span id="closePanel" class="close-panel">&times;</span>
-</div>
-<!-- 色タブ -->
 <div id="colorTabs" class="color-tabs"></div>
-<!-- コンテンツ -->
 <div id="partsContent"></div>
 </div>
-<!-- 操作バー（↑↓無し） -->
 <div id="editBar" class="edit-bar">
 <div class="edit-row">
-<button id="rotateL" class="ctrl" title="左回転">↺</button>
-<button id="rotateR" class="ctrl" title="右回転">↻</button>
+<button id="rotateL" class="ctrl">↺</button>
+<button id="rotateR" class="ctrl">↻</button>
 </div>
 <div class="edit-row">
-<button id="bigger"  class="ctrl" title="拡大">＋</button>
-<button id="smaller" class="ctrl" title="縮小">－</button>
+<button id="bigger" class="ctrl">＋</button>
+<button id="smaller" class="ctrl">－</button>
 </div>
 <div class="edit-row">
-<button id="moveLeft"  class="ctrl" title="左へ">←</button>
-<button id="moveRight" class="ctrl" title="右へ">→</button>
+<button id="moveLeft" class="ctrl">←</button>
+<button id="moveRight" class="ctrl">→</button>
 </div>
-<button id="delete" class="ctrl" title="削除">🗑</button>
+<button id="delete" class="ctrl">🗑</button>
 </div>
 <script>
- // === 要素参照 ===
- const svg = document.getElementById("canvas");
- const wire = document.getElementById("wire");
- const addPartBtn = document.getElementById("addPartBtn");
- const partsBtn = document.getElementById("partsBtn");
- const partsPanel = document.getElementById("partsPanel");
- const closePanel = document.getElementById("closePanel");
- const colorTabs = document.getElementById("colorTabs");
- const partsContent = document.getElementById("partsContent");
- const editBar = document.getElementById("editBar");
- const btnRotL = document.getElementById("rotateL");
- const btnRotR = document.getElementById("rotateR");
- const btnBig  = document.getElementById("bigger");
- const btnSmall= document.getElementById("smaller");
- const btnLeft = document.getElementById("moveLeft");
- const btnRight= document.getElementById("moveRight");
- const btnDel  = document.getElementById("delete");
- // === 円パラメータ ===
- function getCircle(){
-   return {
-     cx: parseFloat(wire.getAttribute("cx")),
-     cy: parseFloat(wire.getAttribute("cy")),
-     r:  parseFloat(wire.getAttribute("r")),
-   };
- }
- // === 状態 ===
- let beads = []; // {el, angle(rad)}
- let selected = null; // beadsの要素
- let rotationDeg = 0;
- let lastActionAt = 0;
- const STEP_DEG = 6; // ←→で動く角度
- const ZOOM_SCALE = 1.5; // 1タップで1.5倍/0.67倍
- const COLORS_ORDER = ["赤","ピンク","青","緑","白","紫","ターコイズ","透明","金色","シルバー","黒","その他"];
- let availableColors = [];
- // === ユーティリティ ===
- function canAct(interval=120){
-   const now = Date.now();
-   if(now - lastActionAt < interval) return false;
-   lastActionAt = now;
-   return true;
- }
- function normalize(a){
-   while(a <= -Math.PI) a += 2*Math.PI;
-   while(a >   Math.PI) a -= 2*Math.PI;
-   return a;
- }
- function angleAtPoint(x,y){
-   const {cx,cy} = getCircle();
-   return Math.atan2(y - cy, x - cx);
- }
- function posFromAngle(angle,w=35,h=35){
-   const {cx,cy,r} = getCircle();
-   const px = cx + r * Math.cos(angle);
-   const py = cy + r * Math.sin(angle);
-   return { x: px - w/2, y: py - h/2 };
- }
- function centerOf(el){
-   const x = parseFloat(el.getAttribute("x"));
-   const y = parseFloat(el.getAttribute("y"));
-   const w = parseFloat(el.getAttribute("width"));
-   const h = parseFloat(el.getAttribute("height"));
-   return { x, y, w, h, cx: x + w/2, cy: y + h/2 };
- }
- function applyCenterRotate(el, deg){
-   el.dataset.rotate = String(deg);
-   const c = centerOf(el);
-   el.setAttribute("transform", `rotate(${deg}, ${c.cx}, ${c.cy})`);
- }
- // === レイアウト（等間隔整列・入れ替え） ===
- function layoutAll(anchorIndex=null){
-   const n = beads.length;
-   if(n===0) return;
-   if(n===1){
-     const b = beads[0], el = b.el;
-     const w = parseFloat(el.getAttribute("width"))||35;
-     const h = parseFloat(el.getAttribute("height"))||35;
-     const p = posFromAngle(b.angle,w,h);
-     el.setAttribute("x",p.x); el.setAttribute("y",p.y);
-     applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
-     return;
-   }
-   const base = (anchorIndex===null)? 0 : anchorIndex;
-   const baseAngle = beads[base].angle;
-   const step = 2*Math.PI / n;
-   for(let i=0;i<n;i++){
-     const idx = i;
-     const a = normalize(baseAngle + (idx - base)*step);
-     beads[idx].angle = a;
-     const el = beads[idx].el;
-     const w = parseFloat(el.getAttribute("width"))||35;
-     const h = parseFloat(el.getAttribute("height"))||35;
-     const p = posFromAngle(a,w,h);
-     el.setAttribute("x",p.x); el.setAttribute("y",p.y);
-     applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
-   }
- }
- function insertAtAngle(bead, targetAngle){
-   beads = beads.filter(b => b !== bead);
-   if(beads.length===0){
-     bead.angle = normalize(targetAngle);
-     beads.push(bead);
-     layoutAll(0);
-     return;
-   }
-   let nearIdx = 0, minDiff = Infinity;
-   beads.forEach((b,i)=>{
-     const d = Math.abs(normalize(targetAngle - b.angle));
-     if(d < minDiff){ minDiff = d; nearIdx = i; }
-   });
-   const insertIndex = nearIdx + 1;
-   beads.splice(insertIndex,0,bead);
-   bead.angle = normalize(targetAngle);
-   layoutAll(insertIndex);
- }
- // === ビーズ追加（一覧→ドラッグ or タップ配置） ===
- function addBead(singleUrl, angle){
-   const el = document.createElementNS("http://www.w3.org/2000/svg","image");
-   el.setAttributeNS(null,"href", singleUrl);
-   el.setAttributeNS(null,"width", 35);
-   el.setAttributeNS(null,"height",35);
-   el.dataset.rotate = "0";
-   svg.appendChild(el);
-   const bead = { el, angle: normalize(angle) };
-   insertAtAngle(bead, angle);
-   // 直接ドラッグ：円上のみ追従
-   let dragging = false;
-   el.addEventListener("pointerdown", (e)=>{
-     e.preventDefault();
-     selectBead(el);
-     dragging = true;
-     el.setPointerCapture(e.pointerId);
-   });
-   el.addEventListener("pointermove", (e)=>{
-     if(!dragging) return;
-     const rect = svg.getBoundingClientRect();
-     const mx = e.clientX - rect.left;
-     const my = e.clientY - rect.top;
-     const ang = angleAtPoint(mx, my);
-     bead.angle = normalize(ang);
-     const w = parseFloat(el.getAttribute("width"));
-     const h = parseFloat(el.getAttribute("height"));
-     const p = posFromAngle(bead.angle, w, h);
-     el.setAttribute("x", p.x);
-     el.setAttribute("y", p.y);
-     applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
-   });
-   el.addEventListener("pointerup", (e)=>{
-     dragging = false;
-     el.releasePointerCapture(e.pointerId);
-     insertAtAngle(bead, bead.angle); // 離した位置で再整列（入れ替え）
-     selectBead(el);
-   });
-   el.addEventListener("click", ()=> selectBead(el));
- }
- // === 選択 ===
- function selectBead(el){
-   selected = beads.find(b => b.el === el) || null;
-   if(!selected){ editBar.classList.remove("show"); return; }
-   rotationDeg = parseFloat(el.dataset.rotate || "0");
-   editBar.classList.add("show");
- }
- svg.addEventListener("pointerdown", e=>{
-   if(e.target.tagName.toLowerCase()!=="image"){
-     selected=null; editBar.classList.remove("show");
-   }
+const svg = document.getElementById("canvas");
+const wire = document.getElementById("wire");
+const colorTabs = document.getElementById("colorTabs");
+const partsContent = document.getElementById("partsContent");
+const editBar = document.getElementById("editBar");
+let beads = [];
+let selected = null;
+let rotationDeg = 0;
+let activeColor = "赤";
+let photosCache = [];
+const COLORS = ["赤","ピンク","青","緑","白","紫","ターコイズ","透明","金色","シルバー","黒","その他"];
+const STEP = 6 * Math.PI/180;
+const ZOOM = 1.5;
+function getCircle(){return {cx:170, cy:170, r:140};}
+function normalize(a){while(a<-Math.PI)a+=2*Math.PI;while(a>Math.PI)a-=2*Math.PI;return a;}
+function angleAt(x,y){const {cx,cy}=getCircle();return Math.atan2(y-cy,x-cx);}
+function pos(angle,w,h){const {cx,cy,r}=getCircle();return{x:cx+r*Math.cos(angle)-w/2,y:cy+r*Math.sin(angle)-h/2};}
+function centerOf(el){const x=parseFloat(el.getAttribute("x")),y=parseFloat(el.getAttribute("y")),w=parseFloat(el.getAttribute("width")),h=parseFloat(el.getAttribute("height"));return{cx:x+w/2,cy:y+h/2,w,h};}
+function applyRotate(el,deg){el.dataset.rotate=deg;const c=centerOf(el);el.setAttribute("transform",`rotate(${deg},${c.cx},${c.cy})`);}
+function addBead(url,angle){
+ const el=document.createElementNS("http://www.w3.org/2000/svg","image");
+ el.setAttributeNS(null,"href",url);el.setAttribute("width",35);el.setAttribute("height",35);
+ el.dataset.rotate="0";svg.appendChild(el);
+ const bead={el,angle:normalize(angle)};beads.push(bead);
+ const p=pos(bead.angle,35,35);el.setAttribute("x",p.x);el.setAttribute("y",p.y);
+ el.addEventListener("pointerdown",e=>{
+   e.preventDefault();select(el);
  });
- // === 操作：回転（中心基準 15°） ===
- btnRotL.addEventListener("click", ()=>{
-   if(!selected || !canAct()) return;
-   rotationDeg -= 15;
-   applyCenterRotate(selected.el, rotationDeg);
+ el.addEventListener("pointermove",e=>{
+   if(e.buttons!==1)return;
+   const rect=svg.getBoundingClientRect();
+   const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+   const ang=angleAt(mx,my);
+   bead.angle=normalize(ang);
+   const w=parseFloat(el.getAttribute("width")),h=parseFloat(el.getAttribute("height"));
+   const p=pos(bead.angle,w,h);
+   el.setAttribute("x",p.x);el.setAttribute("y",p.y);
  });
- btnRotR.addEventListener("click", ()=>{
-   if(!selected || !canAct()) return;
-   rotationDeg += 15;
-   applyCenterRotate(selected.el, rotationDeg);
+ el.addEventListener("click",()=>select(el));
+}
+function select(el){selected=beads.find(b=>b.el===el)||null;if(selected){rotationDeg=parseFloat(el.dataset.rotate||"0");editBar.classList.add("show");}else editBar.classList.remove("show");}
+svg.addEventListener("pointerdown",e=>{if(e.target.tagName!=="image"){selected=null;editBar.classList.remove("show");}});
+document.getElementById("rotateL").onclick=()=>{if(!selected)return;rotationDeg-=15;applyRotate(selected.el,rotationDeg);};
+document.getElementById("rotateR").onclick=()=>{if(!selected)return;rotationDeg+=15;applyRotate(selected.el,rotationDeg);};
+document.getElementById("bigger").onclick=()=>{if(!selected)return;const el=selected.el;const c=centerOf(el);const nw=c.w*ZOOM,nh=c.h*ZOOM;el.setAttribute("x",c.cx-nw/2);el.setAttribute("y",c.cy-nh/2);el.setAttribute("width",nw);el.setAttribute("height",nh);applyRotate(el,rotationDeg);};
+document.getElementById("smaller").onclick=()=>{if(!selected)return;const el=selected.el;const c=centerOf(el);const nw=c.w/ZOOM,nh=c.h/ZOOM;el.setAttribute("x",c.cx-nw/2);el.setAttribute("y",c.cy-nh/2);el.setAttribute("width",nw);el.setAttribute("height",nh);applyRotate(el,rotationDeg);};
+document.getElementById("moveLeft").onclick=()=>{if(!selected)return;selected.angle=normalize(selected.angle-STEP);const el=selected.el;const w=parseFloat(el.getAttribute("width")),h=parseFloat(el.getAttribute("height"));const p=pos(selected.angle,w,h);el.setAttribute("x",p.x);el.setAttribute("y",p.y);};
+document.getElementById("moveRight").onclick=()=>{if(!selected)return;selected.angle=normalize(selected.angle+STEP);const el=selected.el;const w=parseFloat(el.getAttribute("width")),h=parseFloat(el.getAttribute("height"));const p=pos(selected.angle,w,h);el.setAttribute("x",p.x);el.setAttribute("y",p.y);};
+document.getElementById("delete").onclick=()=>{if(!selected)return;selected.el.remove();beads=beads.filter(b=>b!==selected);selected=null;editBar.classList.remove("show");};
+document.getElementById("addPartBtn").onclick=()=>location.href="admin.html";
+document.getElementById("partsBtn").onclick=()=>{document.getElementById("partsPanel").classList.add("open");loadPhotos();};
+document.getElementById("saveBtn").onclick=()=>alert("スクショで保存してください！");
+function renderTabs(){
+ colorTabs.innerHTML="";COLORS.forEach(c=>{const b=document.createElement("button");b.textContent=c;b.className="tab"+(c===activeColor?" active":"");b.onclick=()=>{activeColor=c;renderTabs();renderParts();};colorTabs.appendChild(b);});
+}
+async function loadPhotos(){
+ try{
+   const res=await fetch("/photos");const data=await res.json();photosCache=Array.isArray(data)?data:[];renderTabs();renderParts();
+ }catch(e){partsContent.innerHTML="読み込み失敗";}
+}
+function renderParts(){
+ const list=photosCache.filter(p=>(p.color||"その他")===activeColor);
+ const grid=document.createElement("div");grid.className="parts-grid";
+ list.forEach(p=>{const img=document.createElement("img");img.src=p.listUrl;img.className="part-img";img.dataset.single=p.singleUrl;
+   img.onclick=()=>addBead(p.singleUrl,-Math.PI/2);
+   img.ondragstart=e=>{e.dataTransfer.setData("photo",JSON.stringify(p));};
+   grid.appendChild(img);
  });
- // === 操作：拡大縮小（強め＋誤連打ガード） ===
- function resizeSelected(scale){
-   const el = selected.el;
-   const c  = centerOf(el);
-   const nw = Math.min(Math.max(c.w*scale, 16), 240);
-   const nh = Math.min(Math.max(c.h*scale, 16), 240);
-   el.setAttribute("x", c.cx - nw/2);
-   el.setAttribute("y", c.cy - nh/2);
-   el.setAttribute("width", nw);
-   el.setAttribute("height",nh);
-   // 回転中心は常に自分の中心
-   applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
- }
- btnBig.addEventListener("click", ()=>{
-   if(!selected || !canAct()) return;
-   resizeSelected(ZOOM_SCALE);      // 1.5倍
- });
- btnSmall.addEventListener("click", ()=>{
-   if(!selected || !canAct()) return;
-   resizeSelected(1/ZOOM_SCALE);    // 約0.67倍
- });
- // === 操作：左右移動（円周に沿ってのみ） ===
- function moveAlong(sign){ // sign: +1(→ = CW), -1(← = CCW)
-   const bead = selected;
-   if(!bead) return;
-   bead.angle = normalize(bead.angle + sign * STEP_DEG * Math.PI/180);
-   const el = bead.el;
-   const w = parseFloat(el.getAttribute("width"));
-   const h = parseFloat(el.getAttribute("height"));
-   const p = posFromAngle(bead.angle, w, h);
-   el.setAttribute("x", p.x);
-   el.setAttribute("y", p.y);
-   applyCenterRotate(el, parseFloat(el.dataset.rotate||"0"));
- }
- btnLeft .addEventListener("click", ()=>{ if(!selected || !canAct()) return; moveAlong(-1); });
- btnRight.addEventListener("click", ()=>{ if(!selected || !canAct()) return; moveAlong(+1); });
- // === 削除 ===
- btnDel.addEventListener("click", ()=>{
-   if(!selected) return;
-   selected.el.remove();
-   beads = beads.filter(b => b !== selected);
-   selected = null;
-   editBar.classList.remove("show");
-   if(beads.length) layoutAll(0);
- });
- // === パーツ一覧：色タブ & 2列表示 ===
- let photosCache = [];
- let activeColor = "赤"; // デフォルト表示
- async function loadPhotos(){
-   try{
-     const res = await fetch("/photos");
-     const json = await res.json();
-     photosCache = Array.isArray(json) ? json : [];
-     // 利用可能色を抽出（既定順優先）
-     const set = new Set(photosCache.map(p => p.color || "その他"));
-     availableColors = COLORS_ORDER.filter(c => set.has(c));
-     if(availableColors.length===0){ availableColors = ["その他"]; }
-     if(!availableColors.includes(activeColor)) activeColor = availableColors[0];
-     renderTabs();
-     renderParts(activeColor);
-   }catch(e){
-     partsContent.innerHTML = `<p style="color:#c00;">読み込み失敗: ${e.message}</p>`;
-   }
- }
- function renderTabs(){
-   colorTabs.innerHTML = "";
-   availableColors.forEach(c=>{
-     const btn = document.createElement("button");
-     btn.className = "tab" + (c===activeColor ? " active": "");
-     btn.textContent = c;
-     btn.addEventListener("click", ()=>{
-       activeColor = c;
-       document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-       btn.classList.add("active");
-       renderParts(c);
-     });
-     colorTabs.appendChild(btn);
-   });
- }
- function renderParts(color){
-   // 指定色のみ 2列グリッドで表示
-   const list = photosCache.filter(p => (p.color||"その他") === color);
-   const title = `<div class="group-title">${color}系</div>`;
-   const gridOpen = `<div class="parts-grid">`;
-   const gridClose= `</div>`;
-   if(list.length===0){
-     partsContent.innerHTML = title + `<p style="opacity:.7; margin:8px 2px 16px;">この色のパーツはまだありません。</p>`;
-     return;
-   }
-   const html = list.map(p=>`<img class="part-img" draggable="true" src="${p.listUrl}" data-single="${p.singleUrl}" alt="${p.color||""}">`).join("");
-   partsContent.innerHTML = title + gridOpen + html + gridClose;
-   // D&Dでキャンバスへ配置
-   partsContent.querySelectorAll(".part-img").forEach(img=>{
-     img.addEventListener("dragstart", e=>{
-       e.dataTransfer.setData("photo", JSON.stringify({singleUrl: img.dataset.single, listUrl: img.src, color: color}));
-     });
-     // タップでも配置（スマホ用）
-     img.addEventListener("click", ()=>{
-       // クリックしたら正面の12時方向に仮配置（またはランダム角）
-       addBead(img.dataset.single, -Math.PI/2);
-     });
-   });
- }
- // DnD: キャンバスへドロップ → 角度スナップ配置
- svg.addEventListener("dragover", e=>e.preventDefault());
- svg.addEventListener("drop", e=>{
-   e.preventDefault();
-   const raw = e.dataTransfer.getData("photo");
-   if(!raw) return;
-   const p = JSON.parse(raw);
-   const rect = svg.getBoundingClientRect();
-   const x = e.clientX - rect.left;
-   const y = e.clientY - rect.top;
-   const angle = angleAtPoint(x,y);
-   addBead(p.singleUrl, angle);
- });
- // === ボタン・ナビ ===
- addPartBtn.addEventListener("click", ()=> location.href="admin.html");
- partsBtn.addEventListener("click", async ()=>{ partsPanel.classList.add("open"); await loadPhotos(); });
- closePanel.addEventListener("click", ()=> partsPanel.classList.remove("open"));
- document.getElementById("saveBtn").addEventListener("click", ()=>{
-   alert("保存は端末のスクリーンショットでお願いします（PNG書き出しも追加可能）");
- });
+ partsContent.innerHTML="";partsContent.appendChild(grid);
+}
+svg.addEventListener("dragover",e=>e.preventDefault());
+svg.addEventListener("drop",e=>{
+ e.preventDefault();const raw=e.dataTransfer.getData("photo");if(!raw)return;const p=JSON.parse(raw);
+ const rect=svg.getBoundingClientRect();const x=e.clientX-rect.left,y=e.clientY-rect.top;
+ const angle=angleAt(x,y);addBead(p.singleUrl,angle);
+});
 </script>
 </body>
 </html>
