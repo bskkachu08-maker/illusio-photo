@@ -1,10 +1,12 @@
-// server.js
 import express from "express";
 import multer from "multer";
-import fs from "fs";//
+import * as fs from "node:fs";  // ← node:fs に変更
 import { v2 as cloudinary } from "cloudinary";
-const app = express();
-const upload = multer({ dest: "uploads/" });
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+// ES Module 環境用: __dirname の代わりを作成
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // 静的ファイル配信（HTML, CSS, JS）
 app.use(express.static("newpublic"));
 app.use(express.json());
