@@ -1,7 +1,7 @@
 // server.js
 import express from "express";
 import multer from "multer";
-import fs from "fs";
+import fs from "fs";//
 import { v2 as cloudinary } from "cloudinary";
 const app = express();
 const upload = multer({ dest: "uploads/" });
