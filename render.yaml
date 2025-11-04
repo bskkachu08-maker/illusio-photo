@@ -1,0 +1,10 @@
+# render.yaml
+services:
+ - type: web
+   name: illusio_photo
+   env: node
+   buildCommand: npm install
+   startCommand: npm start
+   plan: starter
+   region: singapore
+   autoDeploy: true
