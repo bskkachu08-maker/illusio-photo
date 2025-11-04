@@ -1,75 +1,67 @@
+// server.js
 import express from "express";
-import fs from "fs";
-import path from "path";
 import multer from "multer";
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
 const app = express();
-const PORT = process.env.PORT || 10000;
-// ==== 静的ファイル ====
-app.use(express.static("newpublic"));
+const upload = multer({ dest: "uploads/" });
+// 静的ファイル配信（HTML, CSS, JS）
+app.use(express.static("public"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// ==== Render書き込み対応領域 ====
-const uploadDir = path.join("/tmp", "uploads");
-const photosJsonPath = path.join("/tmp", "photos.json");
-if (!fs.existsSync(uploadDir)) {
- fs.mkdirSync(uploadDir, { recursive: true });
- console.log("✅ /tmp/uploads フォルダ作成済み");
-}
-// ==== Multer設定 ====
-const storage = multer.diskStorage({
- destination: (req, file, cb) => cb(null, uploadDir),
- filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+// ===== Cloudinary 設定 =====
+cloudinary.config({
+ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+ api_key: process.env.CLOUDINARY_API_KEY,
+ api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-const upload = multer({ storage });
-// ==== アップロード ====
-app.post("/upload", upload.fields([{ name: "photoList" }, { name: "photoSingle" }]), (req, res) => {
- const password = req.body.password;
- if (password !== "Chipi0503") {
-   return res.status(403).send("Forbidden: incorrect password");
- }
- const color = req.body.color;
- const listFile = req.files["photoList"] ? req.files["photoList"][0].filename : null;
- const singleFile = req.files["photoSingle"] ? req.files["photoSingle"][0].filename : null;
- if (!listFile || !singleFile) {
-   return res.status(400).send("Missing file(s)");
- }
+// ===== メモリ上に保持するデータ =====
+let photos = [];
+// ===== アップロード処理 =====
+app.post("/upload", upload.fields([{ name: "listPhoto" }, { name: "singlePhoto" }]), async (req, res) => {
  try {
-   let photos = [];
-   if (fs.existsSync(photosJsonPath)) {
-     photos = JSON.parse(fs.readFileSync(photosJsonPath, "utf8"));
+   const { color, password } = req.body;
+   if (password !== "Chipi0503") {
+     return res.status(403).json({ success: false, message: "Forbidden: incorrect password" });
    }
-   photos.push({
+   const listFile = req.files["listPhoto"]?.[0];
+   const singleFile = req.files["singlePhoto"]?.[0];
+   if (!listFile || !singleFile) {
+     return res.status(400).json({ success: false, message: "ファイルが足りません" });
+   }
+   // Cloudinaryへアップロード
+   const [listResult, singleResult] = await Promise.all([
+     cloudinary.uploader.upload(listFile.path, {
+       folder: "illusio_parts/list",
+       use_filename: true,
+       unique_filename: false,
+     }),
+     cloudinary.uploader.upload(singleFile.path, {
+       folder: "illusio_parts/single",
+       use_filename: true,
+       unique_filename: false,
+     }),
+   ]);
+   // 一時ファイル削除
+   fs.unlinkSync(listFile.path);
+   fs.unlinkSync(singleFile.path);
+   // データを保存
+   const photoData = {
      color,
-     listFile,
-     singleFile,
-     listUrl: `/uploads/${listFile}`,
-     singleUrl: `/uploads/${singleFile}`,
-     timestamp: new Date().toISOString(),
-   });
-   fs.writeFileSync(photosJsonPath, JSON.stringify(photos, null, 2));
-   console.log(`✅ パーツアップロード成功: ${listFile}, ${singleFile} (${color})`);
-   res.send("✅ パーツアップロード成功 (" + color + ")");
- } catch (error) {
-   console.error("❌ パーツ保存エラー:", error);
-   res.status(500).send("Server error: could not save photo");
+     listUrl: listResult.secure_url,
+     singleUrl: singleResult.secure_url,
+   };
+   photos.push(photoData);
+   console.log("✅ New part uploaded:", photoData);
+   res.json({ success: true, photo: photoData });
+ } catch (err) {
+   console.error("❌ Upload error:", err);
+   res.status(500).json({ success: false, message: "アップロード失敗" });
  }
 });
-// ==== パーツ一覧 ====
+// ===== パーツ一覧取得 =====
 app.get("/photos", (req, res) => {
- try {
-   if (fs.existsSync(photosJsonPath)) {
-     const photos = JSON.parse(fs.readFileSync(photosJsonPath, "utf8"));
-     res.json(photos);
-   } else {
-     res.json([]);
-   }
- } catch (error) {
-   console.error("❌ /photos 読み込みエラー:", error);
-   res.status(500).json([]);
- }
+ res.json(photos);
 });
-// ==== アップロード画像の配信 ====
-app.use("/uploads", express.static(uploadDir));
-app.listen(PORT, () => {
- console.log(`✨ +ILLuSio running at http://localhost:${PORT}`);
-});
+// ===== Render用ポート =====
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
