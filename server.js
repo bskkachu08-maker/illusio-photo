@@ -41,6 +41,28 @@ app.post("/upload", upload.fields([{ name: "listPhoto" }, { name: "singlePhoto" 
        unique_filename: false,
      }),
    ]);
+
+  // === パーツ削除API ===
+import fs from "fs";
+app.post("/delete-photo", express.json(), async (req, res) => {
+ const { id, password } = req.body;
+ if (password !== "Chipi0503") {
+   return res.status(403).json({ success: false, message: "Forbidden: incorrect password" });
+ }
+ try {
+   // Cloudinary削除
+   await cloudinary.uploader.destroy(id);
+   // photos.jsonから削除
+   const photosPath = "./photos.json";
+   const data = JSON.parse(fs.readFileSync(photosPath, "utf8"));
+   const filtered = data.filter(p => p.public_id !== id);
+   fs.writeFileSync(photosPath, JSON.stringify(filtered, null, 2), "utf8");
+   res.json({ success: true, message: "削除完了" });
+ } catch (err) {
+   console.error("削除エラー:", err);
+   res.status(500).json({ success: false, message: "削除に失敗しました" });
+ }
+});
    // 一時ファイル削除
    fs.unlinkSync(listFile.path);
    fs.unlinkSync(singleFile.path);
