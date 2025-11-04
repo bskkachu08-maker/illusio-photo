@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const upload = multer({ dest: "uploads/" });
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static("newpublic"));
 // --- Cloudinary設定（RenderのEnvironmentに登録したキーを使う）---
 cloudinary.config({
  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
