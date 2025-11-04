@@ -6,7 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 const app = express();
 const upload = multer({ dest: "uploads/" });
 // 静的ファイル配信（HTML, CSS, JS）
-app.use(express.static("public"));
+app.use(express.static("newpublic"));
 app.use(express.json());
 // ===== Cloudinary 設定 =====
 cloudinary.config({
