@@ -1,47 +1,46 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>＋ILLuSio</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
 <h1 class="logo">＋ILLuSio</h1>
-<button id="addPartBtn" class="addBtn">＋パーツ追加</button>
+<button id="addPartBtn" class="add-part">＋パーツ追加</button>
 </header>
 <main class="main-area">
-<svg id="necklace" width="340" height="340">
-<circle id="wire" cx="170" cy="170" r="140" stroke="#ccc" stroke-width="2" fill="none"/>
+<div class="necklace-area" id="necklaceArea">
+<svg id="canvas" width="340" height="340">
+<circle id="wire" cx="170" cy="170" r="140" stroke="#bfbfbf" stroke-width="2" fill="none"/>
 </svg>
+</div>
 </main>
-<footer>
-<button id="saveBtn">💎 保存</button>
-<button id="partsBtn">💠 パーツ一覧</button>
+<footer class="bottom-buttons">
+<button id="saveBtn"  class="btn">💎 保存</button>
+<button id="partsBtn" class="btn">💠 パーツ一覧</button>
 </footer>
-<div id="partsPanel" class="parts-panel hidden">
+<div id="partsPanel" class="parts-panel">
 <div class="panel-header">
 <strong>パーツ一覧</strong>
-<span id="closePanel">&times;</span>
+<span id="closePanel" class="close-panel">&times;</span>
 </div>
 <div id="colorTabs" class="color-tabs"></div>
 <div id="partsContent"></div>
 </div>
-<div id="editBar" class="edit-bar hidden">
-<div class="row">
-<button id="rotateL">↺</button>
-<button id="rotateR">↻</button>
+<div id="editBar" class="edit-bar">
+<div class="edit-row">
+<button id="rotateL" class="ctrl">↺</button>
+<button id="rotateR" class="ctrl">↻</button>
 </div>
-<div class="row">
-<button id="bigger">＋</button>
-<button id="smaller">－</button>
+<div class="edit-row">
+<button id="bigger"  class="ctrl">＋</button>
+<button id="smaller" class="ctrl">－</button>
 </div>
-<div class="row">
-<button id="delete">🗑</button>
+<button id="delete" class="ctrl">🗑</button>
 </div>
-</div>
-<!-- deferを外して確実に読ませる -->
 <script src="script.js"></script>
 </body>
 </html>
