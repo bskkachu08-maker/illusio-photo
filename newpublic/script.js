@@ -1,149 +1,269 @@
-const necklace = document.getElementById("necklace");
+// === 要素取得 ===
+const svg = document.getElementById("canvas");
 const wire = document.getElementById("wire");
+const addPartBtn = document.getElementById("addPartBtn");
 const partsBtn = document.getElementById("partsBtn");
 const partsPanel = document.getElementById("partsPanel");
 const closePanel = document.getElementById("closePanel");
-const editBar = document.getElementById("editBar");
-const btnRotateL = document.getElementById("rotateL");
-const btnRotateR = document.getElementById("rotateR");
-const btnBig = document.getElementById("bigger");
-const btnSmall = document.getElementById("smaller");
-const btnDelete = document.getElementById("delete");
 const colorTabs = document.getElementById("colorTabs");
 const partsContent = document.getElementById("partsContent");
+const editBar = document.getElementById("editBar");
+const btnRotL = document.getElementById("rotateL");
+const btnRotR = document.getElementById("rotateR");
+const btnBig = document.getElementById("bigger");
+const btnSmall = document.getElementById("smaller");
+const btnDel = document.getElementById("delete");
+const saveBtn = document.getElementById("saveBtn");
+let beads = [];  // {el, angle}
 let selected = null;
+let rotationDeg = 0;
+let lastActionAt = 0;
+const STEP_DEG = 8; // ←→ 角度移動幅
+const ROTATE_STEP = 30; // 回転は30°
+const ZOOM_SCALE = 1.5;
+const COLORS_ORDER = ["赤","ピンク","青","緑","白","紫","ターコイズ","透明","金色","シルバー","黒","その他"];
+let photosCache = [];
+let availableColors = [];
 let activeColor = "赤";
-let photos = [];
-const COLORS = ["赤","青","緑","白","黒","その他"];
-// --- 円情報 ---
+// === 円情報 ===
 function getCircle() {
  return {
    cx: parseFloat(wire.getAttribute("cx")),
    cy: parseFloat(wire.getAttribute("cy")),
-   r: parseFloat(wire.getAttribute("r"))
+   r: parseFloat(wire.getAttribute("r")),
  };
 }
-function angleAt(x, y) {
+function normalize(a) {
+ while (a <= -Math.PI) a += 2 * Math.PI;
+ while (a > Math.PI) a -= 2 * Math.PI;
+ return a;
+}
+function angleAtPoint(x, y) {
  const { cx, cy } = getCircle();
  return Math.atan2(y - cy, x - cx);
 }
-function posFromAngle(angle, size=35) {
+function posFromAngle(angle, w = 35, h = 35) {
  const { cx, cy, r } = getCircle();
- return {
-   x: cx + r * Math.cos(angle) - size/2,
-   y: cy + r * Math.sin(angle) - size/2
- };
+ const px = cx + r * Math.cos(angle);
+ const py = cy + r * Math.sin(angle);
+ return { x: px - w / 2, y: py - h / 2 };
 }
-// --- パーツ一覧 ---
-partsBtn.addEventListener("click", async () => {
- partsPanel.classList.remove("hidden");
- await loadPhotos();
-});
-closePanel.addEventListener("click", () => partsPanel.classList.add("hidden"));
-async function loadPhotos() {
- const res = await fetch("/photos");
- photos = await res.json();
- renderTabs();
- renderParts(activeColor);
+function centerOf(el) {
+ const x = parseFloat(el.getAttribute("x"));
+ const y = parseFloat(el.getAttribute("y"));
+ const w = parseFloat(el.getAttribute("width"));
+ const h = parseFloat(el.getAttribute("height"));
+ return { x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
 }
-function renderTabs() {
- colorTabs.innerHTML = "";
- COLORS.forEach(c => {
-   const btn = document.createElement("button");
-   btn.textContent = c;
-   btn.className = "tab" + (c === activeColor ? " active" : "");
-   btn.onclick = () => { activeColor = c; renderTabs(); renderParts(c); };
-   colorTabs.appendChild(btn);
- });
+function applyCenterRotate(el, deg) {
+ el.dataset.rotate = String(deg);
+ const c = centerOf(el);
+ el.setAttribute("transform", `rotate(${deg}, ${c.cx}, ${c.cy})`);
 }
-function renderParts(color) {
- const list = photos.filter(p => (p.color || "その他") === color);
- partsContent.innerHTML = "";
- list.forEach(p => {
-   const img = document.createElement("img");
-   img.src = p.listUrl;
-   img.className = "part-img";
-   img.draggable = true;
-   img.addEventListener("dragstart", e => {
-     e.dataTransfer.setData("photo", JSON.stringify(p));
-   });
-   partsContent.appendChild(img);
- });
+function canAct(interval = 100) {
+ const now = Date.now();
+ if (now - lastActionAt < interval) return false;
+ lastActionAt = now;
+ return true;
 }
-// --- 配置 ---
-necklace.addEventListener("dragover", e => e.preventDefault());
-necklace.addEventListener("drop", e => {
- e.preventDefault();
- const rect = necklace.getBoundingClientRect();
- const x = e.clientX - rect.left;
- const y = e.clientY - rect.top;
- const data = JSON.parse(e.dataTransfer.getData("photo"));
- const angle = angleAt(x, y);
- const pos = posFromAngle(angle);
- addBead(data.singleUrl, pos.x, pos.y, angle);
-});
-function addBead(url, x, y, angle) {
- const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
- img.setAttributeNS(null, "href", url);
- img.setAttribute("x", x);
- img.setAttribute("y", y);
- img.setAttribute("width", 35);
- img.setAttribute("height", 35);
- img.dataset.angle = angle;
- img.dataset.rotate = 0;
- necklace.appendChild(img);
- makeDraggable(img);
-}
-function makeDraggable(el) {
+// === ビーズ追加 ===
+function addBead(singleUrl, angle) {
+ const el = document.createElementNS("http://www.w3.org/2000/svg", "image");
+ el.setAttributeNS(null, "href", singleUrl);
+ el.setAttributeNS(null, "width", 35);
+ el.setAttributeNS(null, "height", 35);
+ el.dataset.rotate = "0";
+ svg.appendChild(el);
+ const bead = { el, angle: normalize(angle) };
+ beads.push(bead);
+ updateBeadPosition(bead);
+ // 選択
+ el.addEventListener("click", () => selectBead(el));
+ // ドラッグ移動（即スワイプ対応）
  let dragging = false;
- el.addEventListener("pointerdown", e => {
+ el.addEventListener("pointerdown", (e) => {
    e.preventDefault();
-   select(el);
+   selectBead(el);
    dragging = true;
    el.setPointerCapture(e.pointerId);
  });
- el.addEventListener("pointermove", e => {
+ el.addEventListener("pointermove", (e) => {
    if (!dragging) return;
-   const rect = necklace.getBoundingClientRect();
-   const x = e.clientX - rect.left;
-   const y = e.clientY - rect.top;
-   const angle = angleAt(x, y);
-   const pos = posFromAngle(angle);
-   el.setAttribute("x", pos.x);
-   el.setAttribute("y", pos.y);
-   el.dataset.angle = angle;
+   const rect = svg.getBoundingClientRect();
+   const mx = e.clientX - rect.left;
+   const my = e.clientY - rect.top;
+   const ang = angleAtPoint(mx, my);
+   bead.angle = normalize(ang);
+   updateBeadPosition(bead);
  });
- el.addEventListener("pointerup", e => {
+ el.addEventListener("pointerup", (e) => {
    dragging = false;
    el.releasePointerCapture(e.pointerId);
+   selectBead(el);
  });
 }
-function select(el) {
- selected = el;
- editBar.classList.remove("hidden");
+// === 位置更新 ===
+function updateBeadPosition(bead) {
+ const el = bead.el;
+ const w = parseFloat(el.getAttribute("width"));
+ const h = parseFloat(el.getAttribute("height"));
+ const p = posFromAngle(bead.angle, w, h);
+ el.setAttribute("x", p.x);
+ el.setAttribute("y", p.y);
+ applyCenterRotate(el, parseFloat(el.dataset.rotate || "0"));
 }
-// --- 編集バー ---
-btnRotateL.onclick = () => rotate(-30);
-btnRotateR.onclick = () => rotate(30);
-btnBig.onclick = () => resize(1.4);
-btnSmall.onclick = () => resize(0.7);
-btnDelete.onclick = () => {
- if (selected) selected.remove();
+// === 選択 ===
+function selectBead(el) {
+ selected = beads.find((b) => b.el === el) || null;
+ if (!selected) {
+   editBar.classList.remove("show");
+   return;
+ }
+ rotationDeg = parseFloat(el.dataset.rotate || "0");
+ editBar.classList.add("show");
+}
+svg.addEventListener("pointerdown", (e) => {
+ if (e.target.tagName.toLowerCase() !== "image") {
+   selected = null;
+   editBar.classList.remove("show");
+ }
+});
+// === 回転 ===
+btnRotL.addEventListener("click", () => {
+ if (!selected || !canAct()) return;
+ rotationDeg -= ROTATE_STEP;
+ applyCenterRotate(selected.el, rotationDeg);
+});
+btnRotR.addEventListener("click", () => {
+ if (!selected || !canAct()) return;
+ rotationDeg += ROTATE_STEP;
+ applyCenterRotate(selected.el, rotationDeg);
+});
+// === 拡大縮小 ===
+function resizeSelected(scale) {
+ const el = selected.el;
+ const c = centerOf(el);
+ const nw = Math.min(Math.max(c.w * scale, 20), 200);
+ const nh = Math.min(Math.max(c.h * scale, 20), 200);
+ el.setAttribute("x", c.cx - nw / 2);
+ el.setAttribute("y", c.cy - nh / 2);
+ el.setAttribute("width", nw);
+ el.setAttribute("height", nh);
+ applyCenterRotate(el, parseFloat(el.dataset.rotate || "0"));
+}
+btnBig.addEventListener("click", () => {
+ if (!selected || !canAct()) return;
+ resizeSelected(ZOOM_SCALE);
+});
+btnSmall.addEventListener("click", () => {
+ if (!selected || !canAct()) return;
+ resizeSelected(1 / ZOOM_SCALE);
+});
+// === 削除 ===
+btnDel.addEventListener("click", () => {
+ if (!selected) return;
+ selected.el.remove();
+ beads = beads.filter((b) => b !== selected);
  selected = null;
- editBar.classList.add("hidden");
-};
-function rotate(angle) {
- if (!selected) return;
- const deg = (parseFloat(selected.dataset.rotate) || 0) + angle;
- selected.dataset.rotate = deg;
- const cx = parseFloat(selected.getAttribute("x")) + 17.5;
- const cy = parseFloat(selected.getAttribute("y")) + 17.5;
- selected.setAttribute("transform", `rotate(${deg}, ${cx}, ${cy})`);
+ editBar.classList.remove("show");
+});
+// === パーツ読み込み ===
+async function loadPhotos() {
+ try {
+   const res = await fetch("/photos");
+   const json = await res.json();
+   photosCache = Array.isArray(json) ? json : [];
+   const set = new Set(photosCache.map((p) => p.color || "その他"));
+   availableColors = COLORS_ORDER.filter((c) => set.has(c));
+   if (availableColors.length === 0) availableColors = ["その他"];
+   if (!availableColors.includes(activeColor)) activeColor = availableColors[0];
+   renderTabs();
+   renderParts(activeColor);
+ } catch (e) {
+   partsContent.innerHTML = `<p style="color:#c00;">読み込み失敗: ${e.message}</p>`;
+ }
 }
-function resize(scale) {
- if (!selected) return;
- const w = parseFloat(selected.getAttribute("width")) * scale;
- const h = parseFloat(selected.getAttribute("height")) * scale;
- selected.setAttribute("width", w);
- selected.setAttribute("height", h);
+// === タブ生成 ===
+function renderTabs() {
+ colorTabs.innerHTML = "";
+ availableColors.forEach((c) => {
+   const btn = document.createElement("button");
+   btn.className = "tab" + (c === activeColor ? " active" : "");
+   btn.textContent = c;
+   btn.addEventListener("click", () => {
+     activeColor = c;
+     document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+     btn.classList.add("active");
+     renderParts(c);
+   });
+   colorTabs.appendChild(btn);
+ });
 }
+// === パーツ一覧表示 ===
+function renderParts(color) {
+ const list = photosCache.filter((p) => (p.color || "その他") === color);
+ const title = `<div class="group-title">${color}系</div>`;
+ if (list.length === 0) {
+   partsContent.innerHTML = title + `<p>この色のパーツはありません。</p>`;
+   return;
+ }
+ const html = list
+   .map(
+     (p) =>
+       `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+<img class="part-img" draggable="true" src="${p.listUrl}" data-single="${p.singleUrl}" alt="${p.color}">
+<button class="deletePart" data-id="${p.id}" style="border:1px solid #111;background:transparent;color:#111;border-radius:6px;padding:4px 6px;cursor:pointer;">削除</button>
+</div>`
+   )
+   .join("");
+ partsContent.innerHTML = title + html;
+ // ドラッグ配置 or クリック配置
+ partsContent.querySelectorAll(".part-img").forEach((img) => {
+   img.addEventListener("dragstart", (e) => {
+     e.dataTransfer.setData("photo", JSON.stringify({ singleUrl: img.dataset.single }));
+   });
+   img.addEventListener("click", () => addBead(img.dataset.single, -Math.PI / 2));
+ });
+ // 削除ボタン
+ document.querySelectorAll(".deletePart").forEach((btn) => {
+   btn.addEventListener("click", async () => {
+     const pw = prompt("パスワードを入力");
+     if (!pw) return;
+     const res = await fetch("/delete", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ id: btn.dataset.id, password: pw }),
+     });
+     const data = await res.json();
+     if (data.success) {
+       alert("削除しました");
+       loadPhotos();
+     } else {
+       alert("削除失敗: " + (data.message || "エラー"));
+     }
+   });
+ });
+}
+// === ドロップで配置 ===
+svg.addEventListener("dragover", (e) => e.preventDefault());
+svg.addEventListener("drop", (e) => {
+ e.preventDefault();
+ const raw = e.dataTransfer.getData("photo");
+ if (!raw) return;
+ const p = JSON.parse(raw);
+ const rect = svg.getBoundingClientRect();
+ const x = e.clientX - rect.left;
+ const y = e.clientY - rect.top;
+ const angle = angleAtPoint(x, y);
+ addBead(p.singleUrl, angle);
+});
+// === ボタン・ナビ ===
+addPartBtn.addEventListener("click", () => (location.href = "admin.html"));
+partsBtn.addEventListener("click", async () => {
+ partsPanel.classList.add("open");
+ await loadPhotos();
+});
+closePanel.addEventListener("click", () => partsPanel.classList.remove("open"));
+saveBtn.addEventListener("click", () => {
+ alert("保存は端末のスクリーンショットでお願いします。");
+});
