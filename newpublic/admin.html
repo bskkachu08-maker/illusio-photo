@@ -1,59 +1,27 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>+ILLuSio パーツ追加ページ</title>
-<style>
- body{font-family:sans-serif;background:#fafafa;color:#111;text-align:center;padding:20px;}
- h1{font-size:1.6rem;margin-bottom:20px;}
- input,select,button{margin:10px 0;padding:10px;border-radius:8px;border:1px solid #ccc;width:80%;max-width:300px;}
- button{background:#111;color:#fff;font-weight:bold;border:none;cursor:pointer;}
- button:hover{opacity:.8;}
- .msg{margin-top:15px;font-weight:bold;}
- a{color:#333;text-decoration:none;}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>＋ILLuSio パーツ追加</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>+ILLuSio パーツ追加ページ</h1>
-<form id="uploadForm">
-<input type="password" name="password" placeholder="管理者パスワード" required><br>
-<label>色カテゴリ:</label><br>
-<select name="color" required>
-<option>赤</option><option>青</option><option>緑</option><option>ピンク</option>
-<option>白</option><option>紫</option><option>ターコイズ</option><option>透明</option>
-<option>金色</option><option>シルバー</option><option>黒</option><option>その他</option>
-</select><br>
-<label>一覧用の写真（複数ビーズ）:</label><br>
-<input type="file" name="listPhoto" accept="image/*" required><br>
-<label>配置用の写真（1粒ビーズ）:</label><br>
-<input type="file" name="singlePhoto" accept="image/*" required><br>
-<button type="submit">アップロード</button>
+<header>
+<h1 class="logo">＋ILLuSio</h1>
+</header>
+<main class="main-area">
+<h2>パーツ追加フォーム</h2>
+<form id="uploadForm" enctype="multipart/form-data">
+<p><input type="password" name="password" placeholder="パスワード" required></p>
+<p><input type="text" name="color" placeholder="色 (例: 赤, 青, 緑)" required></p>
+<p>一覧用画像（複数粒）:<br><input type="file" name="listPhoto" accept="image/*" required></p>
+<p>単品画像（1粒）:<br><input type="file" name="singlePhoto" accept="image/*" required></p>
+<p><button type="submit" class="btn">アップロード</button></p>
 </form>
-<div id="msg" class="msg"></div>
-<a href="index.html">← デザイン画面へ戻る</a>
-<script>
-   document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-     e.preventDefault();
-     const form = e.target;
-     const data = new FormData(form);
-     const msg = document.getElementById("msg");
-     msg.textContent = "アップロード中...";
-     try {
-       const res = await fetch("/upload", { method: "POST", body: data });
-       const json = await res.json();
-       if (json.success) {
-         msg.style.color = "green";
-         msg.textContent = "✅ アップロード成功！";
-       } else {
-         msg.style.color = "red";
-         msg.textContent = "❌ 失敗: " + json.message;
-       }
-     } catch (err) {
-       msg.style.color = "red";
-       msg.textContent = "❌ 通信エラー";
-     }
-   });
-</script>
+<div id="result"></div>
+<p><a href="index.html">← 戻る</a></p>
+</main>
+<script src="admin.js"></script>
 </body>
 </html>
