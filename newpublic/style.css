@@ -1,39 +1,79 @@
 body {
- background: #f9f9f9;
- text-align: center;
  margin: 0;
- font-family: 'Hiragino Sans', sans-serif;
+ font-family: "Hiragino Sans", sans-serif;
+ background: #f7f7f7;
+ color: #111;
+ text-align: center;
+ display: flex;
+ flex-direction: column;
+ height: 100vh;
 }
-.logo { margin-top: 10px; font-size: 2rem; font-weight: 700; }
-.addBtn {
- position: absolute; right: 15px; top: 15px;
- border: none; background: black; color: white;
- border-radius: 10px; padding: 6px 10px;
+.logo {
+ margin: .5rem 0;
+ font-size: 2rem;
 }
-.main-area { display: flex; justify-content: center; margin-top: 20px; }
-footer { margin-top: 20px; display: flex; justify-content: center; gap: 12px; }
-button { cursor: pointer; }
+.add-part {
+ position: absolute;
+ right: 10px; top: 10px;
+ background: #111; color: #fff;
+ border: 0; border-radius: 8px;
+ padding: 8px 12px; cursor: pointer;
+}
+.bottom-buttons {
+ display: flex;
+ gap: 10px;
+ justify-content: center;
+ padding: 10px 0 20px;
+}
+.btn {
+ border: 1px solid #111;
+ background: transparent;
+ color: #111;
+ border-radius: 8px;
+ padding: 8px 12px;
+}
+.btn:hover {
+ background: #111;
+ color: #fff;
+}
 .parts-panel {
- position: fixed; bottom: 0; left: 0; right: 0;
- background: white; border-top: 2px solid #ddd;
- padding: 10px; overflow-y: auto; max-height: 60%;
+ position: fixed; left: 0; right: 0; bottom: -70%;
+ background: #fff;
+ border-top: 2px solid #ddd;
+ border-radius: 12px 12px 0 0;
+ box-shadow: 0 -8px 20px rgba(0,0,0,.15);
  transition: bottom .3s ease;
+ padding: 14px;
+ text-align: left;
+ overflow: auto;
 }
-.hidden { display: none; }
-.part-img { width: 60px; height: 60px; object-fit: cover; margin: 6px; border-radius: 10px; cursor: grab; }
-.color-tabs { display: flex; justify-content: center; gap: 8px; margin: 10px 0; }
-.tab {
- border: 1px solid #aaa; border-radius: 999px; padding: 6px 12px;
- background: white; color: #111; cursor: pointer;
+.parts-panel.open { bottom: 0; }
+.part-img {
+ width: 100%; aspect-ratio: 1/1; object-fit: contain;
+ border: 1px solid #ddd; border-radius: 8px;
+ cursor: grab;
 }
-.tab.active { background: #111; color: white; }
 .edit-bar {
- position: fixed; right: 15px; bottom: 20px;
- background: rgba(255,255,255,0.9); border-radius: 15px;
- padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+ position: fixed;
+ right: 20px; bottom: 20px;
+ background: rgba(255,255,255,.8);
+ border: 1px solid #ddd;
+ border-radius: 12px;
+ padding: 10px;
+ display: none;
+ flex-direction: column;
+ gap: 6px;
 }
-.row { display: flex; justify-content: center; gap: 8px; margin: 5px 0; }
-.edit-bar button {
- border: 1px solid #aaa; background: transparent; color: black;
- border-radius: 8px; width: 40px; height: 40px;
+.edit-bar.show { display: flex; }
+.ctrl {
+ background: transparent;
+ border: 1px solid #111;
+ color: #111;
+ border-radius: 8px;
+ font-size: 1.1rem;
+ width: 42px; height: 42px;
+}
+.ctrl:hover {
+ background: #111;
+ color: #fff;
 }
